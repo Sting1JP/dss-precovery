@@ -1,0 +1,2246 @@
+{
+ "version": "1.0.0",
+ "subject": "50000 Quaoar",
+ "plates": [
+  {
+   "plate": "poss2ukstu_ir_IS655_A49I",
+   "mid": "1994-04-20T16:41:00",
+   "exp_min": 90.0,
+   "site": "413",
+   "mpc": "260",
+   "V": 18.895,
+   "ra3": 0.254,
+   "dec3": 0.033,
+   "smaa": 0.255,
+   "smia": 0.021,
+   "theta": -5.775,
+   "pred_ra": 239.922482246,
+   "pred_dec": -14.070899834,
+   "flag": "known-object check failed",
+   "time_note": "UK Schmidt: header time read as MID-exposure (not marked reportable)",
+   "reportable": false,
+   "header_dateobs": "1994-04-20T16:41:00",
+   "clock_sigma_min": null,
+   "uncertainty_source": "Horizons 3-sigma ellipse",
+   "n_det": 423,
+   "n_ref": 206,
+   "rms_arcsec": 0.093,
+   "order": 2,
+   "psf_sigma_px": 1.468,
+   "box_arcsec": [
+    60,
+    60
+   ],
+   "scale_arcsec_px": 1.0082,
+   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=413&obs-time=2449463.195139&fov-ra-center=15-59-41.40&fov-dec-center=M14-04-15.24&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "n_in_box": 24,
+   "n_candidates": 1,
+   "n_within_3sigma": 1,
+   "rate_arcsec_h": 2.474,
+   "half_exposure_shift_arcsec": 1.86,
+   "comparison_dates": [
+    "phase2_gsc1 S655_03YK 1983-07-10 (noise 183)",
+    "poss1_blue XO745_A3S0 1954-04-08 (noise 341)",
+    "poss1_red XE745_0FGW 1954-04-08 (noise 190)",
+    "poss2ukstu_red ER655_A2B1 1992-06-05 (noise 307)"
+   ],
+   "n_comparison_plates": 4,
+   "not_used_as_comparison": [
+    "poss2ukstu_blue: the same plate S655_03YK as phase2_gsc1; counted once"
+   ],
+   "best_ra": 239.92262979380445,
+   "best_dec": -14.070948781422002,
+   "best_dra": 0.52,
+   "best_ddec": -0.18,
+   "best_mag": 19.29,
+   "best_snr": 10.5,
+   "best_sig_ra": 0.207,
+   "best_sig_dec": 0.231,
+   "best_dist_sigma": 2.438,
+   "best_note": "",
+   "result": "unique candidate within 3 sigma",
+   "status": "ok"
+  },
+  {
+   "plate": "phase2_gsc1_S724_017A",
+   "mid": "1982-07-17T09:22:00",
+   "exp_min": 60.0,
+   "site": "413",
+   "mpc": "260",
+   "V": 19.015,
+   "ra3": 0.568,
+   "dec3": 0.104,
+   "smaa": 0.577,
+   "smia": 0.029,
+   "theta": -9.957,
+   "pred_ra": 223.350064359,
+   "pred_dec": -11.525646206,
+   "flag": "known-object check failed",
+   "time_note": "UK Schmidt: header time read as MID-exposure (not marked reportable)",
+   "reportable": false,
+   "header_dateobs": "1982-07-17T09:22",
+   "clock_sigma_min": null,
+   "uncertainty_source": "Horizons 3-sigma ellipse",
+   "n_det": 271,
+   "n_ref": 140,
+   "rms_arcsec": 0.098,
+   "order": 2,
+   "psf_sigma_px": 1.059,
+   "box_arcsec": [
+    60,
+    60
+   ],
+   "scale_arcsec_px": 1.6992,
+   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=413&obs-time=2445167.890278&fov-ra-center=14-53-24.02&fov-dec-center=M11-31-32.33&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "n_in_box": 13,
+   "n_candidates": 3,
+   "n_within_3sigma": 1,
+   "rate_arcsec_h": 0.684,
+   "half_exposure_shift_arcsec": 0.34,
+   "comparison_dates": [
+    "poss1_blue XO742_A3RX 1954-04-02 (noise 361)",
+    "poss1_red XE742_0FGT 1954-04-02 (noise 130)",
+    "poss2ukstu_ir IS724_A43I 1993-07-22 (noise 133)",
+    "poss2ukstu_red ER724_A2B7 1996-03-25 (noise 344)"
+   ],
+   "n_comparison_plates": 4,
+   "not_used_as_comparison": [],
+   "best_ra": 223.3500512699184,
+   "best_dec": -11.525639459551108,
+   "best_dra": -0.05,
+   "best_ddec": 0.02,
+   "best_mag": 18.54,
+   "best_snr": 25.8,
+   "best_sig_ra": 0.114,
+   "best_sig_dec": 0.115,
+   "best_dist_sigma": 0.254,
+   "best_note": "",
+   "result": "unique candidate within 3 sigma",
+   "status": "ok"
+  }
+ ],
+ "candidates": {
+  "poss2ukstu_ir_IS655_A49I": [
+   {
+    "x": 243.55,
+    "y": 244.18,
+    "ra": 239.93831337860414,
+    "dec": -14.08590873525517,
+    "dra_arcsec": 55.28,
+    "ddec_arcsec": -54.03,
+    "snr": 10.0,
+    "mag_g_scale": 19.56,
+    "conc_rel": 1.07,
+    "fwhm_px": 3.19,
+    "flux": 15659.0,
+    "amp": 1408.5016218465842,
+    "gaia_star_within": 0.09,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.095,
+    "sig_dec_arcsec": 0.095,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      28.1,
+      8.5
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      6.5,
+      4.5
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      9.2,
+      5.7
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      14.2,
+      8.3
+     ]
+    ],
+    "dist_sigma": 690.671,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 324.87,
+    "y": 248.35,
+    "ra": 239.91481760853412,
+    "dec": -14.0846437467897,
+    "dra_arcsec": -26.76,
+    "ddec_arcsec": -49.48,
+    "snr": 92.0,
+    "mag_g_scale": 16.28,
+    "conc_rel": 0.94,
+    "fwhm_px": 3.59,
+    "flux": 167672.0,
+    "amp": 12680.280130940933,
+    "gaia_star_within": 0.05,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.028,
+    "sig_dec_arcsec": 0.028,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      73.0,
+      79.5
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      37.3,
+      43.3
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      61.7,
+      65.1
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      49.8,
+      64.5
+     ]
+    ],
+    "dist_sigma": 1814.292,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 315.58,
+    "y": 257.43,
+    "ra": 239.91751370798022,
+    "dec": -14.082113330669012,
+    "dra_arcsec": -17.35,
+    "ddec_arcsec": -40.37,
+    "snr": 9.8,
+    "mag_g_scale": 19.52,
+    "conc_rel": 1.13,
+    "fwhm_px": 3.46,
+    "flux": 16106.0,
+    "amp": 1509.6042776070276,
+    "gaia_star_within": 0.37,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.098,
+    "sig_dec_arcsec": 0.098,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      32.4,
+      8.7
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      10.9,
+      4.6
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      8.9,
+      5.9
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      15.2,
+      8.5
+     ]
+    ],
+    "dist_sigma": 439.209,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 335.05,
+    "y": 259.35,
+    "ra": 239.91189095065062,
+    "dec": -14.081551298169733,
+    "dra_arcsec": -36.98,
+    "ddec_arcsec": -38.35,
+    "snr": 62.8,
+    "mag_g_scale": 16.89,
+    "conc_rel": 1.02,
+    "fwhm_px": 3.43,
+    "flux": 107432.0,
+    "amp": 8800.992067562749,
+    "gaia_star_within": 0.12,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.028,
+    "sig_dec_arcsec": 0.028,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      61.4,
+      52.5
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      27.7,
+      28.4
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      47.6,
+      41.4
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      41.9,
+      44.1
+     ]
+    ],
+    "dist_sigma": 1499.82,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 298.22,
+    "y": 262.79,
+    "ra": 239.9225389937421,
+    "dec": -14.080636207825664,
+    "dra_arcsec": 0.2,
+    "ddec_arcsec": -35.05,
+    "snr": 102.1,
+    "mag_g_scale": 16.05,
+    "conc_rel": 0.81,
+    "fwhm_px": 3.71,
+    "flux": 197443.0,
+    "amp": 13725.679278534059,
+    "gaia_star_within": 0.06,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.035,
+    "sig_dec_arcsec": 0.035,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      82.2,
+      93.0
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      38.0,
+      50.7
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      64.2,
+      77.1
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      54.1,
+      74.5
+     ]
+    ],
+    "dist_sigma": 989.734,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 254.22,
+    "y": 265.25,
+    "ra": 239.9352587637084,
+    "dec": -14.08000183010366,
+    "dra_arcsec": 44.61,
+    "ddec_arcsec": -32.77,
+    "snr": 13.0,
+    "mag_g_scale": 19.16,
+    "conc_rel": 1.12,
+    "fwhm_px": 3.4,
+    "flux": 20963.0,
+    "amp": 1913.679371325672,
+    "gaia_star_within": 0.27,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.086,
+    "sig_dec_arcsec": 0.086,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      20.7,
+      11.2
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      6.8,
+      6.0
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      10.1,
+      7.7
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      13.9,
+      10.7
+     ]
+    ],
+    "dist_sigma": 512.408,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 348.66,
+    "y": 265.43,
+    "ra": 239.9079636723482,
+    "dec": -14.079834829890402,
+    "dra_arcsec": -50.7,
+    "ddec_arcsec": -32.17,
+    "snr": 62.6,
+    "mag_g_scale": 16.76,
+    "conc_rel": 0.87,
+    "fwhm_px": 3.51,
+    "flux": 118527.0,
+    "amp": 9183.60400734458,
+    "gaia_star_within": 0.1,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.029,
+    "sig_dec_arcsec": 0.029,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      52.6,
+      57.3
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      22.3,
+      31.1
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      47.9,
+      45.6
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      38.9,
+      47.8
+     ]
+    ],
+    "dist_sigma": 1357.979,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 305.53,
+    "y": 272.75,
+    "ra": 239.92043947457216,
+    "dec": -14.077841117430568,
+    "dra_arcsec": -7.13,
+    "ddec_arcsec": -24.99,
+    "snr": 91.6,
+    "mag_g_scale": 16.21,
+    "conc_rel": 0.86,
+    "fwhm_px": 3.69,
+    "flux": 176152.0,
+    "amp": 13471.81497889965,
+    "gaia_star_within": 0.09,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.042,
+    "sig_dec_arcsec": 0.042,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      50.6,
+      83.4
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      23.6,
+      45.4
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      50.1,
+      68.5
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      46.5,
+      67.4
+     ]
+    ],
+    "blend": {
+     "neighbors_arcsec": [
+      6.5
+     ],
+     "shift_from_one_source_fit": [
+      -0.01,
+      -0.02
+     ]
+    },
+    "dist_sigma": 596.881,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "blended: fitted jointly with a source 6.5\" away; not shown absent on any other-date plate"
+   },
+   {
+    "x": 303.55,
+    "y": 279.06,
+    "ra": 239.92101873571002,
+    "dec": -14.07607885969732,
+    "dra_arcsec": -5.11,
+    "ddec_arcsec": -18.64,
+    "snr": 56.1,
+    "mag_g_scale": 16.97,
+    "conc_rel": 0.96,
+    "fwhm_px": 3.65,
+    "flux": 102017.0,
+    "amp": 7947.013689921632,
+    "gaia_star_within": 0.1,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.111,
+    "sig_dec_arcsec": 0.111,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      21.5,
+      49.7
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "neighbor",
+      3.3,
+      26.9
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      18.3,
+      39.0
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      28.6,
+      41.9
+     ]
+    ],
+    "blend": {
+     "neighbors_arcsec": [
+      6.5
+     ],
+     "shift_from_one_source_fit": [
+      0.04,
+      0.12
+     ]
+    },
+    "dist_sigma": 172.811,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "blended: fitted jointly with a source 6.5\" away; not shown absent on any other-date plate"
+   },
+   {
+    "x": 320.86,
+    "y": 295.41,
+    "ra": 239.91603719365278,
+    "dec": -14.07148279992079,
+    "dra_arcsec": -22.51,
+    "ddec_arcsec": -2.1,
+    "snr": 5.2,
+    "mag_g_scale": 20.43,
+    "conc_rel": 1.34,
+    "fwhm_px": 3.38,
+    "flux": 8396.0,
+    "amp": 880.1024411740392,
+    "gaia_star_within": 0.43,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.15,
+    "sig_dec_arcsec": 0.15,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": true,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      6.5,
+      4.7
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "too shallow",
+      1.2,
+      2.5
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "too shallow",
+      1.8,
+      3.0
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      4.4,
+      4.8
+     ]
+    ],
+    "dist_sigma": 131.833,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss2ukstu_red 1992-06-05)",
+    "note": "brighter star within 12\" (centroid may be pulled); not shown absent on any other-date plate"
+   },
+   {
+    "x": 298.06,
+    "y": 297.42,
+    "ra": 239.92262979380445,
+    "dec": -14.070948781422002,
+    "dra_arcsec": 0.52,
+    "ddec_arcsec": -0.18,
+    "snr": 10.5,
+    "mag_g_scale": 19.29,
+    "conc_rel": 0.85,
+    "fwhm_px": 3.83,
+    "flux": 19100.0,
+    "amp": 1383.673900124369,
+    "gaia_star_within": 10.05,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.207,
+    "sig_dec_arcsec": 0.231,
+    "err_source": "largest of formal, injected stars (200), similar-brightness references (77)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "absent",
+      -0.2,
+      10.2
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "absent",
+      -1.1,
+      5.4
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "absent",
+      0.4,
+      7.0
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "absent",
+      -1.2,
+      9.8
+     ]
+    ],
+    "dist_sigma": 2.438,
+    "err_parts": {
+     "formal": [
+      0.116,
+      0.116
+     ],
+     "injected": [
+      0.207,
+      0.231,
+      200
+     ],
+     "similar_refs": [
+      0.147,
+      0.092,
+      77
+     ]
+    },
+    "rejected": "",
+    "note": ""
+   },
+   {
+    "x": 324.48,
+    "y": 305.87,
+    "ra": 239.91500433584798,
+    "dec": -14.068549821497422,
+    "dra_arcsec": -26.11,
+    "ddec_arcsec": 8.46,
+    "snr": 60.9,
+    "mag_g_scale": 16.86,
+    "conc_rel": 0.96,
+    "fwhm_px": 3.46,
+    "flux": 110523.0,
+    "amp": 8721.350861070254,
+    "gaia_star_within": 0.03,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.033,
+    "sig_dec_arcsec": 0.033,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      29.9,
+      53.6
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      11.0,
+      29.0
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      36.1,
+      42.3
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      31.6,
+      44.9
+     ]
+    ],
+    "dist_sigma": 340.266,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 266.74,
+    "y": 311.58,
+    "ra": 239.931698458,
+    "dec": -14.067026962589784,
+    "dra_arcsec": 32.18,
+    "ddec_arcsec": 13.94,
+    "snr": 52.4,
+    "mag_g_scale": 17.02,
+    "conc_rel": 0.92,
+    "fwhm_px": 3.61,
+    "flux": 98363.0,
+    "amp": 7360.654396602949,
+    "gaia_star_within": 0.02,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.047,
+    "sig_dec_arcsec": 0.047,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "neighbor",
+      15.9,
+      48.0
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "neighbor",
+      3.2,
+      26.0
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      17.9,
+      37.6
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      18.3,
+      40.6
+     ]
+    ],
+    "dist_sigma": 476.002,
+    "rejected": "Gaia star; static (present on poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 357.89,
+    "y": 314.83,
+    "ra": 239.90536127009528,
+    "dec": -14.066000833253204,
+    "dra_arcsec": -59.79,
+    "ddec_arcsec": 17.63,
+    "snr": 15.7,
+    "mag_g_scale": 18.76,
+    "conc_rel": 0.88,
+    "fwhm_px": 3.61,
+    "flux": 28003.0,
+    "amp": 2212.5749874327003,
+    "gaia_star_within": 0.09,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.073,
+    "sig_dec_arcsec": 0.073,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      13.6,
+      14.7
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "absent",
+      1.3,
+      7.8
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      11.2,
+      10.3
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      14.3,
+      13.7
+     ]
+    ],
+    "dist_sigma": 568.912,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": ""
+   },
+   {
+    "x": 277.24,
+    "y": 316.51,
+    "ra": 239.92867142786156,
+    "dec": -14.065633228352116,
+    "dra_arcsec": 21.61,
+    "ddec_arcsec": 18.96,
+    "snr": 19.0,
+    "mag_g_scale": 18.5,
+    "conc_rel": 1.06,
+    "fwhm_px": 3.61,
+    "flux": 33699.0,
+    "amp": 2748.86539260045,
+    "gaia_star_within": 0.13,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.094,
+    "sig_dec_arcsec": 0.094,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      30.3,
+      17.5
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      12.1,
+      9.4
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      14.4,
+      12.5
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      18.7,
+      16.1
+     ]
+    ],
+    "blend": {
+     "neighbors_arcsec": [
+      4.7
+     ],
+     "shift_from_one_source_fit": [
+      -0.01,
+      -0.01
+     ]
+    },
+    "dist_sigma": 272.214,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "blended: fitted jointly with a source 4.7\" away; not shown absent on any other-date plate"
+   },
+   {
+    "x": 274.01,
+    "y": 321.44,
+    "ra": 239.92961191296337,
+    "dec": -14.06425766650216,
+    "dra_arcsec": 24.9,
+    "ddec_arcsec": 23.91,
+    "snr": 9.1,
+    "mag_g_scale": 19.61,
+    "conc_rel": 1.15,
+    "fwhm_px": 4.33,
+    "flux": 15088.0,
+    "amp": 1191.028462065155,
+    "gaia_star_within": 0.22,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.093,
+    "sig_dec_arcsec": 0.093,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "absent",
+      1.0,
+      8.2
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "too shallow",
+      0.5,
+      4.4
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "absent",
+      1.9,
+      5.5
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      5.6,
+      8.1
+     ]
+    ],
+    "blend": {
+     "neighbors_arcsec": [
+      4.7
+     ],
+     "shift_from_one_source_fit": [
+      1.06,
+      0.83
+     ]
+    },
+    "dist_sigma": 332.833,
+    "rejected": "Gaia star; static (present on poss2ukstu_red 1992-06-05)",
+    "note": "blended: fitted jointly with a source 4.7\" away"
+   },
+   {
+    "x": 297.62,
+    "y": 322.11,
+    "ra": 239.92278782031522,
+    "dec": -14.06404279492774,
+    "dra_arcsec": 1.07,
+    "ddec_arcsec": 24.69,
+    "snr": 6.5,
+    "mag_g_scale": 19.82,
+    "conc_rel": 0.9,
+    "fwhm_px": 3.9,
+    "flux": 13001.0,
+    "amp": 860.3523961667913,
+    "gaia_star_within": 12.16,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.358,
+    "sig_dec_arcsec": 0.32,
+    "err_source": "largest of formal, injected stars (198), similar-brightness references (61)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      13.2,
+      7.1
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "too shallow",
+      2.2,
+      3.8
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "neighbor",
+      5.1,
+      4.7
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      5.6,
+      7.1
+     ]
+    ],
+    "dist_sigma": 77.249,
+    "err_parts": {
+     "formal": [
+      0.157,
+      0.157
+     ],
+     "injected": [
+      0.358,
+      0.32,
+      198
+     ],
+     "similar_refs": [
+      0.156,
+      0.093,
+      61
+     ]
+    },
+    "rejected": "static (present on phase2_gsc1 1983-07-10, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 352.42,
+    "y": 324.13,
+    "ra": 239.9069542476248,
+    "dec": -14.063406789069475,
+    "dra_arcsec": -54.23,
+    "ddec_arcsec": 26.97,
+    "snr": 14.4,
+    "mag_g_scale": 18.93,
+    "conc_rel": 0.9,
+    "fwhm_px": 3.2,
+    "flux": 24774.0,
+    "amp": 2263.5539387014087,
+    "gaia_star_within": 0.02,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.07,
+    "sig_dec_arcsec": 0.07,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      31.7,
+      13.1
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      13.5,
+      7.0
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      13.1,
+      9.1
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      16.8,
+      12.3
+     ]
+    ],
+    "dist_sigma": 599.607,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 272.2,
+    "y": 330.45,
+    "ra": 239.93014677350683,
+    "dec": -14.061740426940322,
+    "dra_arcsec": 26.77,
+    "ddec_arcsec": 32.97,
+    "snr": 9.1,
+    "mag_g_scale": 19.62,
+    "conc_rel": 1.27,
+    "fwhm_px": 3.42,
+    "flux": 15056.0,
+    "amp": 1434.411241839219,
+    "gaia_star_within": 0.37,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.127,
+    "sig_dec_arcsec": 0.127,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      17.0,
+      8.2
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      5.9,
+      4.3
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      5.9,
+      5.5
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      10.9,
+      8.0
+     ]
+    ],
+    "dist_sigma": 318.089,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 299.12,
+    "y": 334.12,
+    "ra": 239.92237027119032,
+    "dec": -14.060679121259433,
+    "dra_arcsec": -0.39,
+    "ddec_arcsec": 36.79,
+    "snr": 9.1,
+    "mag_g_scale": 19.57,
+    "conc_rel": 1.13,
+    "fwhm_px": 3.32,
+    "flux": 15598.0,
+    "amp": 1382.181351963672,
+    "gaia_star_within": 0.18,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.083,
+    "sig_dec_arcsec": 0.083,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "absent",
+      1.3,
+      8.5
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "too shallow",
+      1.9,
+      4.5
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "absent",
+      0.9,
+      5.7
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      5.2,
+      8.3
+     ]
+    ],
+    "dist_sigma": 438.261,
+    "rejected": "Gaia star; static (present on poss2ukstu_red 1992-06-05)",
+    "note": ""
+   },
+   {
+    "x": 241.9,
+    "y": 338.99,
+    "ra": 239.9389138240158,
+    "dec": -14.059389670336337,
+    "dra_arcsec": 57.38,
+    "ddec_arcsec": 41.43,
+    "snr": 6.9,
+    "mag_g_scale": 19.9,
+    "conc_rel": 0.88,
+    "fwhm_px": 3.7,
+    "flux": 12311.0,
+    "amp": 927.0954183872536,
+    "gaia_star_within": 17.23,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.292,
+    "sig_dec_arcsec": 0.336,
+    "err_source": "largest of formal, injected stars (198), similar-brightness references (56)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      9.8,
+      6.7
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "too shallow",
+      1.1,
+      3.6
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "too shallow",
+      2.2,
+      4.4
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      5.9,
+      6.7
+     ]
+    ],
+    "dist_sigma": 226.117,
+    "err_parts": {
+     "formal": [
+      0.109,
+      0.109
+     ],
+     "injected": [
+      0.292,
+      0.336,
+      198
+     ],
+     "similar_refs": [
+      0.154,
+      0.093,
+      56
+     ]
+    },
+    "rejected": "static (present on phase2_gsc1 1983-07-10, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 346.82,
+    "y": 353.32,
+    "ra": 239.90861123359915,
+    "dec": -14.055246958388341,
+    "dra_arcsec": -48.44,
+    "ddec_arcsec": 56.35,
+    "snr": 64.2,
+    "mag_g_scale": 16.81,
+    "conc_rel": 0.97,
+    "fwhm_px": 3.54,
+    "flux": 114405.0,
+    "amp": 8888.513165079412,
+    "gaia_star_within": 0.01,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.026,
+    "sig_dec_arcsec": 0.026,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      42.9,
+      55.4
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      17.2,
+      30.1
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      45.5,
+      43.9
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      38.0,
+      46.3
+     ]
+    ],
+    "dist_sigma": 1984.88,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 297.82,
+    "y": 354.88,
+    "ra": 239.9227719169254,
+    "dec": -14.054872749361538,
+    "dra_arcsec": 1.01,
+    "ddec_arcsec": 57.7,
+    "snr": 70.8,
+    "mag_g_scale": 16.68,
+    "conc_rel": 0.95,
+    "fwhm_px": 3.51,
+    "flux": 125765.0,
+    "amp": 9762.223534154853,
+    "gaia_star_within": 0.11,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.027,
+    "sig_dec_arcsec": 0.027,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      66.8,
+      60.5
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "present",
+      33.9,
+      32.9
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      51.6,
+      48.4
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      42.5,
+      50.3
+     ]
+    ],
+    "dist_sigma": 2074.209,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 266.71,
+    "y": 356.74,
+    "ra": 239.93176405947514,
+    "dec": -14.05439334403032,
+    "dra_arcsec": 32.41,
+    "ddec_arcsec": 59.42,
+    "snr": 11.8,
+    "mag_g_scale": 19.23,
+    "conc_rel": 1.09,
+    "fwhm_px": 3.53,
+    "flux": 19930.0,
+    "amp": 1738.5017849484848,
+    "gaia_star_within": 0.68,
+    "gaia_radius": 3.22,
+    "sig_ra_arcsec": 0.103,
+    "sig_dec_arcsec": 0.103,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "phase2_gsc1",
+      "1983-07-10",
+      "present",
+      9.4,
+      10.7
+     ],
+     [
+      "poss1_blue",
+      "1954-04-08",
+      "absent",
+      1.6,
+      5.7
+     ],
+     [
+      "poss1_red",
+      "1954-04-08",
+      "present",
+      4.4,
+      7.3
+     ],
+     [
+      "poss2ukstu_red",
+      "1992-06-05",
+      "present",
+      12.3,
+      10.2
+     ]
+    ],
+    "blend": {
+     "neighbors_arcsec": [
+      6.9
+     ],
+     "shift_from_one_source_fit": [
+      -0.0,
+      -0.0
+     ]
+    },
+    "dist_sigma": 636.333,
+    "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
+    "note": "blended: fitted jointly with a source 6.9\" away"
+   }
+  ],
+  "phase2_gsc1_S724_017A": [
+   {
+    "x": 181.37,
+    "y": 154.88,
+    "ra": 223.34769524907395,
+    "dec": -11.536099568691691,
+    "dra_arcsec": -8.36,
+    "ddec_arcsec": -37.63,
+    "snr": 4.0,
+    "mag_g_scale": 21.11,
+    "conc_rel": 0.74,
+    "fwhm_px": 3.66,
+    "flux": 4290.0,
+    "amp": 725.2469588689211,
+    "gaia_star_within": 26.4,
+    "gaia_radius": 3.33,
+    "sig_ra_arcsec": 0.562,
+    "sig_dec_arcsec": 0.652,
+    "err_source": "largest of formal, injected stars (195), similar-brightness references (10)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "too shallow",
+      0.9,
+      2.0
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "too shallow",
+      -0.4,
+      1.8
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "too shallow",
+      -1.2,
+      2.1
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "too shallow",
+      0.1,
+      3.1
+     ]
+    ],
+    "dist_sigma": 59.523,
+    "err_parts": {
+     "formal": [
+      0.441,
+      0.441
+     ],
+     "injected": [
+      0.562,
+      0.652,
+      195
+     ],
+     "similar_refs": [
+      0.073,
+      0.2,
+      10
+     ]
+    },
+    "rejected": "",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 158.31,
+    "y": 156.49,
+    "ra": 223.35880418715047,
+    "dec": -11.535365082758563,
+    "dra_arcsec": 30.83,
+    "ddec_arcsec": -34.99,
+    "snr": 5.4,
+    "mag_g_scale": 21.05,
+    "conc_rel": 1.02,
+    "fwhm_px": 3.41,
+    "flux": 4479.0,
+    "amp": 1108.341406473397,
+    "gaia_star_within": 33.12,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.428,
+    "sig_dec_arcsec": 0.422,
+    "err_source": "largest of formal, injected stars (198), similar-brightness references (12)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "too shallow",
+      0.0,
+      2.0
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "too shallow",
+      2.6,
+      1.9
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "too shallow",
+      -0.7,
+      2.2
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "too shallow",
+      1.9,
+      3.2
+     ]
+    ],
+    "dist_sigma": 104.06,
+    "err_parts": {
+     "formal": [
+      0.283,
+      0.283
+     ],
+     "injected": [
+      0.428,
+      0.422,
+      198
+     ],
+     "similar_refs": [
+      0.073,
+      0.2,
+      12
+     ]
+    },
+    "rejected": "",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 195.44,
+    "y": 161.06,
+    "ra": 223.3409233769423,
+    "dec": -11.53316364335605,
+    "dra_arcsec": -32.24,
+    "ddec_arcsec": -27.06,
+    "snr": 7.0,
+    "mag_g_scale": 20.76,
+    "conc_rel": 1.48,
+    "fwhm_px": 3.28,
+    "flux": 5433.0,
+    "amp": 1399.9934570733644,
+    "gaia_star_within": 0.34,
+    "gaia_radius": 3.33,
+    "sig_ra_arcsec": 0.3,
+    "sig_dec_arcsec": 0.301,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "too shallow",
+      2.7,
+      2.4
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "too shallow",
+      2.3,
+      2.4
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "too shallow",
+      2.2,
+      2.7
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      3.2,
+      3.9
+     ]
+    ],
+    "dist_sigma": 131.342,
+    "rejected": "Gaia star; static (present on poss2ukstu_red 1996-03-25)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 176.54,
+    "y": 177.05,
+    "ra": 223.3500512699184,
+    "dec": -11.525639459551108,
+    "dra_arcsec": -0.05,
+    "ddec_arcsec": 0.02,
+    "snr": 25.8,
+    "mag_g_scale": 18.54,
+    "conc_rel": 1.0,
+    "fwhm_px": 2.53,
+    "flux": 24670.0,
+    "amp": 4798.587426545667,
+    "gaia_star_within": 20.84,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.114,
+    "sig_dec_arcsec": 0.115,
+    "err_source": "largest of formal, injected stars (200), similar-brightness references (71)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "absent",
+      0.4,
+      9.7
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "absent",
+      -1.4,
+      12.4
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "absent",
+      -0.0,
+      13.5
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "absent",
+      0.1,
+      15.8
+     ]
+    ],
+    "dist_sigma": 0.254,
+    "err_parts": {
+     "formal": [
+      0.114,
+      0.115
+     ],
+     "injected": [
+      0.094,
+      0.095,
+      200
+     ],
+     "similar_refs": [
+      0.068,
+      0.1,
+      71
+     ]
+    },
+    "rejected": "",
+    "note": ""
+   },
+   {
+    "x": 147.57,
+    "y": 181.87,
+    "ra": 223.36401110588244,
+    "dec": -11.523396336965387,
+    "dra_arcsec": 49.2,
+    "ddec_arcsec": 8.1,
+    "snr": 24.7,
+    "mag_g_scale": 18.63,
+    "conc_rel": 1.04,
+    "fwhm_px": 2.03,
+    "flux": 23127.0,
+    "amp": 4784.523069772111,
+    "gaia_star_within": 0.15,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.109,
+    "sig_dec_arcsec": 0.109,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "present",
+      8.7,
+      9.2
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "present",
+      11.1,
+      11.6
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "present",
+      6.9,
+      12.7
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      14.2,
+      14.9
+     ]
+    ],
+    "dist_sigma": 260.929,
+    "rejected": "Gaia star; static (present on poss1_blue 1954-04-02, poss1_red 1954-04-02, poss2ukstu_ir 1993-07-22, poss2ukstu_red 1996-03-25)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 160.7,
+    "y": 183.0,
+    "ra": 223.3576876525232,
+    "dec": -11.52284969275765,
+    "dra_arcsec": 26.89,
+    "ddec_arcsec": 10.07,
+    "snr": 36.4,
+    "mag_g_scale": 17.98,
+    "conc_rel": 1.07,
+    "fwhm_px": 2.76,
+    "flux": 36038.0,
+    "amp": 6408.687421884819,
+    "gaia_star_within": 0.11,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.108,
+    "sig_dec_arcsec": 0.109,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "present",
+      11.6,
+      13.8
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "present",
+      14.6,
+      18.9
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "present",
+      12.1,
+      20.4
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      19.8,
+      22.6
+     ]
+    ],
+    "dist_sigma": 174.453,
+    "rejected": "Gaia star; static (present on poss1_blue 1954-04-02, poss1_red 1954-04-02, poss2ukstu_ir 1993-07-22, poss2ukstu_red 1996-03-25)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 203.43,
+    "y": 187.66,
+    "ra": 223.33710742473409,
+    "dec": -11.520598573187486,
+    "dra_arcsec": -45.71,
+    "ddec_arcsec": 18.17,
+    "snr": 7.7,
+    "mag_g_scale": 20.53,
+    "conc_rel": 1.01,
+    "fwhm_px": 3.46,
+    "flux": 6372.0,
+    "amp": 1522.9713522499542,
+    "gaia_star_within": 0.33,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.257,
+    "sig_dec_arcsec": 0.257,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "too shallow",
+      2.3,
+      2.8
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "too shallow",
+      -0.1,
+      2.8
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "too shallow",
+      0.1,
+      3.2
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      3.1,
+      4.5
+     ]
+    ],
+    "dist_sigma": 155.073,
+    "rejected": "Gaia star; static (present on poss2ukstu_red 1996-03-25)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 159.81,
+    "y": 188.91,
+    "ra": 223.35812248880114,
+    "dec": -11.520058415721522,
+    "dra_arcsec": 28.42,
+    "ddec_arcsec": 20.12,
+    "snr": 8.8,
+    "mag_g_scale": 20.25,
+    "conc_rel": 1.24,
+    "fwhm_px": 2.72,
+    "flux": 7724.0,
+    "amp": 1666.1601357216928,
+    "gaia_star_within": 0.32,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.214,
+    "sig_dec_arcsec": 0.214,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": true,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "too shallow",
+      1.6,
+      3.4
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "present",
+      3.2,
+      3.5
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "present",
+      3.5,
+      3.9
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      7.8,
+      5.3
+     ]
+    ],
+    "dist_sigma": 143.55,
+    "rejected": "Gaia star; static (present on poss1_red 1954-04-02, poss2ukstu_ir 1993-07-22, poss2ukstu_red 1996-03-25)",
+    "note": "brighter star within 12\" (centroid may be pulled); not shown absent on any other-date plate"
+   },
+   {
+    "x": 178.53,
+    "y": 189.15,
+    "ra": 223.34910571776737,
+    "dec": -11.519927324603328,
+    "dra_arcsec": -3.38,
+    "ddec_arcsec": 20.59,
+    "snr": 24.5,
+    "mag_g_scale": 18.65,
+    "conc_rel": 1.16,
+    "fwhm_px": 2.6,
+    "flux": 22865.0,
+    "amp": 4648.22432696888,
+    "gaia_star_within": 0.06,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.131,
+    "sig_dec_arcsec": 0.131,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "present",
+      8.4,
+      9.1
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "present",
+      9.9,
+      11.5
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "present",
+      7.5,
+      12.5
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      14.5,
+      14.8
+     ]
+    ],
+    "dist_sigma": 153.164,
+    "rejected": "Gaia star; static (present on poss1_blue 1954-04-02, poss1_red 1954-04-02, poss2ukstu_ir 1993-07-22, poss2ukstu_red 1996-03-25)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 151.21,
+    "y": 192.44,
+    "ra": 223.36226971015617,
+    "dec": -11.51840612346969,
+    "dra_arcsec": 43.05,
+    "ddec_arcsec": 26.06,
+    "snr": 7.8,
+    "mag_g_scale": 20.48,
+    "conc_rel": 1.23,
+    "fwhm_px": 3.23,
+    "flux": 6568.0,
+    "amp": 1513.4195793585804,
+    "gaia_star_within": 0.32,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.238,
+    "sig_dec_arcsec": 0.238,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "too shallow",
+      1.5,
+      2.9
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "too shallow",
+      0.9,
+      2.9
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "too shallow",
+      1.2,
+      3.3
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      5.8,
+      4.6
+     ]
+    ],
+    "dist_sigma": 186.122,
+    "rejected": "Gaia star; static (present on poss2ukstu_red 1996-03-25)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 203.13,
+    "y": 201.19,
+    "ra": 223.33727094325553,
+    "dec": -11.514211205016306,
+    "dra_arcsec": -45.13,
+    "ddec_arcsec": 41.16,
+    "snr": 15.8,
+    "mag_g_scale": 19.43,
+    "conc_rel": 1.41,
+    "fwhm_px": 2.41,
+    "flux": 13433.0,
+    "amp": 2843.259240050959,
+    "gaia_star_within": 0.19,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.165,
+    "sig_dec_arcsec": 0.165,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "present",
+      3.6,
+      5.6
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "present",
+      9.3,
+      6.4
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "present",
+      12.6,
+      7.0
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      13.8,
+      9.0
+     ]
+    ],
+    "dist_sigma": 283.856,
+    "rejected": "Gaia star; static (present on poss1_blue 1954-04-02, poss1_red 1954-04-02, poss2ukstu_ir 1993-07-22, poss2ukstu_red 1996-03-25)",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 154.66,
+    "y": 205.64,
+    "ra": 223.3606245547315,
+    "dec": -11.512171970911249,
+    "dra_arcsec": 37.25,
+    "ddec_arcsec": 48.51,
+    "snr": 9.1,
+    "mag_g_scale": 19.96,
+    "conc_rel": 0.63,
+    "fwhm_px": 3.25,
+    "flux": 9358.0,
+    "amp": 1670.336122193987,
+    "gaia_star_within": 0.59,
+    "gaia_radius": 3.33,
+    "sig_ra_arcsec": 0.216,
+    "sig_dec_arcsec": 0.216,
+    "err_source": "formal (provisional)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "too shallow",
+      2.8,
+      4.0
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "too shallow",
+      2.3,
+      4.3
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "too shallow",
+      0.3,
+      4.8
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "unclear",
+      2.0,
+      6.4
+     ]
+    ],
+    "dist_sigma": 268.698,
+    "rejected": "Gaia star",
+    "note": "not shown absent on any other-date plate"
+   },
+   {
+    "x": 191.96,
+    "y": 211.2,
+    "ra": 223.34266575265772,
+    "dec": -11.509501599614373,
+    "dra_arcsec": -26.1,
+    "ddec_arcsec": 58.12,
+    "snr": 16.4,
+    "mag_g_scale": 18.99,
+    "conc_rel": 0.76,
+    "fwhm_px": 2.79,
+    "flux": 18126.0,
+    "amp": 2883.127056816491,
+    "gaia_star_within": 21.14,
+    "gaia_radius": 3.0,
+    "sig_ra_arcsec": 0.161,
+    "sig_dec_arcsec": 0.16,
+    "err_source": "largest of formal, injected stars (200), similar-brightness references (73)",
+    "bright_star_within_12": false,
+    "static_test": [
+     [
+      "poss1_blue",
+      "1954-04-02",
+      "unclear",
+      2.5,
+      7.4
+     ],
+     [
+      "poss1_red",
+      "1954-04-02",
+      "present",
+      5.4,
+      8.9
+     ],
+     [
+      "poss2ukstu_ir",
+      "1993-07-22",
+      "present",
+      5.0,
+      9.7
+     ],
+     [
+      "poss2ukstu_red",
+      "1996-03-25",
+      "present",
+      10.8,
+      11.9
+     ]
+    ],
+    "dist_sigma": 359.403,
+    "err_parts": {
+     "formal": [
+      0.117,
+      0.117
+     ],
+     "injected": [
+      0.161,
+      0.16,
+      200
+     ],
+     "similar_refs": [
+      0.077,
+      0.107,
+      73
+     ]
+    },
+    "rejected": "static (present on poss1_red 1954-04-02, poss2ukstu_ir 1993-07-22, poss2ukstu_red 1996-03-25)",
+    "note": "not shown absent on any other-date plate"
+   }
+  ]
+ }
+}

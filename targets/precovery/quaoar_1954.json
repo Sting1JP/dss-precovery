@@ -1,0 +1,12 @@
+{
+  "designation": "50000 Quaoar",
+  "names": ["Quaoar", "50000"],
+  "horizons_command": "50000;",
+  "years": [1950, 1958],
+  "surveys": ["poss1_red", "poss1_blue"],
+  "survey_years": {"poss1_red": [1950, 1958], "poss1_blue": [1950, 1958]},
+  "box_factor": 1.5,
+  "min_box_arcsec": 138,
+  "cutout_arcmin": 10,
+  "note": "Known-answer test on POSS-I plates (Quaoar was V 19.0 in 1954). The search box is widened to 138 arcsec each way from the prediction, as for a poorly known object."
+}

@@ -1,0 +1,13 @@
+{
+  "designation": "136199 Eris",
+  "names": ["Eris", "136199"],
+  "horizons_command": "136199;",
+  "years": [1976, 2000],
+  "surveys": ["phase2_gsc1", "poss2ukstu_blue", "poss2ukstu_red", "poss2ukstu_ir", "quickv"],
+  "survey_years": {"phase2_gsc1": [1976, 1990], "poss2ukstu_blue": [1976, 2000], "poss2ukstu_red": [1978, 2000],
+                   "poss2ukstu_ir": [1978, 2000], "quickv": [1981, 1984]},
+  "box_factor": 1.5,
+  "min_box_arcsec": 60,
+  "cutout_arcmin": 10,
+  "note": "Known-answer test on UK Schmidt plates, 1976-2000 (Eris was V 18.7). Search box at least 60 arcsec."
+}

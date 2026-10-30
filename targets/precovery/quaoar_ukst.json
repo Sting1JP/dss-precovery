@@ -1,0 +1,13 @@
+{
+  "designation": "50000 Quaoar",
+  "names": ["Quaoar", "50000"],
+  "horizons_command": "50000;",
+  "years": [1975, 2000],
+  "surveys": ["phase2_gsc1", "poss2ukstu_blue", "poss2ukstu_red", "poss2ukstu_ir", "quickv"],
+  "survey_years": {"phase2_gsc1": [1975, 1990], "poss2ukstu_blue": [1975, 2000], "poss2ukstu_red": [1978, 2000],
+                   "poss2ukstu_ir": [1978, 2000], "quickv": [1981, 1984]},
+  "box_factor": 1.5,
+  "min_box_arcsec": 60,
+  "cutout_arcmin": 10,
+  "note": "Known-answer test on UK Schmidt plates, 1975-2000 (Quaoar was V 18.9; exposures of 60-90 min). Search box at least 60 arcsec."
+}

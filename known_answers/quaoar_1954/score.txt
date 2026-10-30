@@ -1,0 +1,38 @@
+tool version 1.0.0, 4 plates in plan, 4 measured
+
+poss1_red_XE675_0DGY  mid 1954-05-25T04:31:54  exp 45.0 min  V 19.05  status ok
+  nearest source: +0.35" -0.01"  snr 9.0  mag 19.42  rejected=''  gaia star within 26.3"
+  C2 result field: 'unique candidate within 3 sigma'; target unique within 3 sigma: True
+  C2 top candidate: True   C3 residual RA +0.35 (limit 1.85), Dec -0.01 (limit 1.05), total 0.35 (limit 2.0): pass
+  C4 along-track residual: UT=start (tool) -0.32", UT=mid +0.27" (half-exposure shift 0.59", sigma 0.63"): inconclusive (shift 0.59" < 2 sigma 1.25")
+  C6 other non-rejected candidates in the box: 11
+
+poss1_red_XE676_0DGZ  mid 1956-05-08T05:25:54  exp 45.0 min  V 19.00  status ok
+  nearest source: -0.11" -0.42"  snr 6.3  mag 19.62  rejected=''  gaia star within 22.0"
+  C2 result field: 'unique candidate within 3 sigma'; target unique within 3 sigma: True
+  C2 top candidate: True   C3 residual RA -0.11 (limit 2.21), Dec -0.42 (limit 1.49), total 0.43 (limit 2.0): pass
+  C4 along-track residual: UT=start (tool) -0.07", UT=mid +0.80" (half-exposure shift 0.87", sigma 0.74"): inconclusive (shift 0.87" < 2 sigma 1.47")
+  C6 other non-rejected candidates in the box: 6
+
+poss1_blue_XO675_A3Q4  mid 1954-05-25T05:07:54  exp 15.0 min  V 19.05  status ok
+  nearest source: -0.20" +0.13"  snr 14.3  mag 19.03  rejected=''  gaia star within 27.7"
+  C2 result field: 'unique candidate within 3 sigma'; target unique within 3 sigma: True
+  C2 top candidate: True   C3 residual RA -0.20 (limit 1.78), Dec +0.13 (limit 0.74), total 0.24 (limit 2.0): pass
+  C4 along-track residual: UT=start (tool) +0.24", UT=mid +0.43" (half-exposure shift 0.20", sigma 0.60"): inconclusive (shift 0.20" < 2 sigma 1.20")
+  C6 other non-rejected candidates in the box: 35
+
+poss1_blue_XO676_A3Q5  mid 1956-05-08T05:56:00  exp 8.0 min  V 19.00  status ok
+  nearest source: -0.70" +0.51"  snr 7.9  mag 19.38  rejected=''  gaia star within 19.9"
+  C2 result field: 'unique candidate within 3 sigma'; target unique within 3 sigma: True
+  C2 top candidate: True   C3 residual RA -0.70 (limit 1.72), Dec +0.51 (limit 1.05), total 0.87 (limit 2.0): pass
+  C4 along-track residual: UT=start (tool) +0.85", UT=mid +1.00" (half-exposure shift 0.15", sigma 0.59"): inconclusive (shift 0.15" < 2 sigma 1.17")
+  C6 other non-rejected candidates in the box: 5
+
+C5 same night poss1_red_XE675_0DGY / poss1_blue_XO675_A3Q4: 0.60 h apart; moved -1.40" +0.52", predicted -0.86" +0.39"; difference 0.56" (limit 2.0): pass
+
+C5 same night poss1_red_XE676_0DGZ / poss1_blue_XO676_A3Q5: 0.50 h apart; moved -1.66" +1.39", predicted -1.07" +0.47"; difference 1.10" (limit 2.0): pass
+
+C1 plates found: True
+C7 residual / stated error, all plates and both coordinates: n 8, rms 0.80, max |1.46|
+C4 overall: inconclusive (conclusive plates: 0)
+VERDICT: PASS on 4 clear-sky plates

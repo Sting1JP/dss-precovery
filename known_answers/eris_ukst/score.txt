@@ -1,0 +1,20 @@
+tool version 1.0.0, 2 plates in plan, 2 measured
+
+poss2ukstu_red_ER683_A0QM  mid 1989-09-29T14:42:00  exp 70.0 min  V 18.66  status ok
+  nearest source: -0.04" +0.25"  snr 28.9  mag 18.20  rejected=''  gaia star within 30.3"
+  C2 result field: 'unique candidate within 3 sigma'; target unique within 3 sigma: True
+  C2 top candidate: True   C3 residual RA -0.04 (limit 0.31), Dec +0.25 (limit 0.40), total 0.25 (limit 2.0): pass
+  C4 along-track residual: UT=mid (tool) -0.06", UT=start -0.90" (half-exposure shift 0.84", sigma 0.12"): the tool's reading (UT=mid) confirmed
+  C6 other non-rejected candidates in the box: 2
+
+phase2_gsc1_S683_00WP  mid 1982-09-19T14:58:00  exp 65.0 min  V 18.68  status ok
+  nearest source: +0.07" +0.19"  snr 32.9  mag 17.92  rejected=''  gaia star within 44.3"
+  C2 result field: 'unique candidate within 3 sigma'; target unique within 3 sigma: True
+  C2 top candidate: True   C3 residual RA +0.07 (limit 0.36), Dec +0.19 (limit 0.55), total 0.20 (limit 2.0): pass
+  C4 along-track residual: UT=mid (tool) -0.15", UT=start -0.89" (half-exposure shift 0.75", sigma 0.17"): the tool's reading (UT=mid) confirmed
+  C6 other non-rejected candidates in the box: 1
+
+C1 plates found: True
+C7 residual / stated error, all plates and both coordinates: n 4, rms 1.13, max |1.89|
+C4 overall: pass (conclusive plates: 2)
+VERDICT: PASS on 2 clear-sky plates

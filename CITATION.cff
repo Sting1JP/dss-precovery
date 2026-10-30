@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "dss-precovery: Precovery of Known Distant Solar System Objects on Digitized Sky Survey Plates"
+version: 1.0.0
+doi: 10.5281/zenodo.23805409
+date-released: 2026-10-30
+authors:
+  - family-names: Stinga
+    given-names: Stefano Ivan
+    affiliation: Independent researcher
+    orcid: "https://orcid.org/0009-0005-3860-3944"
+    email: stefano@stinga.jp
+repository-code: "https://github.com/Sting1JP/dss-precovery"
+license: MIT
+abstract: >-
+  A Python tool that looks for a known, slow-moving Solar System object on the Digitized Sky Survey scans of old
+  photographic plates (POSS-I and UK Schmidt) and measures its positions. It finds the plates taken while the
+  object was on them, refits each plate's astrometry to Gaia DR3, searches the JPL Horizons uncertainty region,
+  rejects stars, plate flaws and sources seen on plates from other dates (POSS-II included), and
+  fits blended neighbors jointly. It includes an offline self-test, three known-answer tests (Quaoar and Eris)
+  with their results, and D. Hill's POSS-I plate dates and clock corrections (CC BY 4.0).
+keywords:
+  - precovery
+  - astrometry
+  - Digitized Sky Survey
+  - POSS-I
+  - UK Schmidt
+  - photographic plates
+  - trans-Neptunian objects
+  - Gaia DR3
+  - JPL Horizons
+references:
+  - type: software
+    title: "POSS Transients Re-examined: a re-analysis of the VASCO POSS-I transient results"
+    authors:
+      - family-names: Hill
+        given-names: Donal
+    version: 1.4.0
+    year: 2026
+    doi: 10.5281/zenodo.23549537
+    repository-code: "https://github.com/donalhill/poss-transients"
+    license:
+      - MIT
+      - CC-BY-4.0
