@@ -1,18 +1,18 @@
 {
   "upload_type": "software",
   "title": "dss-precovery: Precovery of Known Distant Solar System Objects on Digitized Sky Survey Plates",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "creators": [
     {"name": "Stinga, Stefano Ivan", "affiliation": "Independent researcher", "orcid": "0009-0005-3860-3944"}
   ],
-  "description": "<p>A Python tool that looks for a known, slow-moving Solar System object on the Digitized Sky Survey scans of old photographic plates (POSS-I and UK Schmidt) and measures its positions. It finds the plates taken while the object was on them, refits each plate's astrometry to Gaia DR3, searches the JPL Horizons uncertainty region, rejects stars, plate flaws and sources seen on plates from other dates (POSS-II included), and fits blended neighbors jointly.</p><p>The package includes an offline self-test, three known-answer tests (Quaoar on POSS-I plates, Quaoar and Eris on UK Schmidt plates) with their results, and D. Hill's POSS-I plate dates and clock corrections (doi:10.5281/zenodo.23549537). See README.md for installation, use and credits.</p><p>The code is under the MIT License. Hill's two tables are under CC BY 4.0 (LICENSE-TABLES.md).</p>",
+  "description": "<p>A Python tool that looks for a known, slow-moving Solar System object on the Digitized Sky Survey scans of old photographic plates (POSS-I and UK Schmidt) and measures its positions. It finds the plates taken while the object was on them, refits each plate's astrometry to Gaia DR3, searches the JPL Horizons uncertainty region, rejects stars, plate flaws, known asteroids and comets (SkyBoT) and sources seen on plates from other dates (POSS-II included), and fits blended neighbors jointly.</p><p>Version 1.1.0: the known-object check uses SkyBoT, which covers the dates of the plates, so positions can now be marked reportable; a search can be run by object name; an error page from the DSS archive stops the run instead of reading as \"no plate here\".</p><p>The package includes an offline self-test, three known-answer tests (Quaoar on POSS-I plates, Quaoar and Eris on UK Schmidt plates) with their results, and D. Hill's POSS-I plate dates and clock corrections (doi:10.5281/zenodo.23549537). See README.md for installation, use and credits.</p><p>The code is under the MIT License. Hill's two tables are under CC BY 4.0 (LICENSE-TABLES.md).</p>",
   "access_right": "open",
   "license": "mit",
   "language": "eng",
   "keywords": ["precovery", "astrometry", "Digitized Sky Survey", "POSS-I", "UK Schmidt", "photographic plates",
-               "trans-Neptunian objects", "Gaia DR3", "JPL Horizons"],
+               "trans-Neptunian objects", "Gaia DR3", "JPL Horizons", "SkyBoT"],
   "related_identifiers": [
-    {"identifier": "https://github.com/Sting1JP/dss-precovery/tree/v1.0.0", "relation": "isSupplementTo", "resource_type": "software"},
+    {"identifier": "https://github.com/Sting1JP/dss-precovery/tree/v1.1.0", "relation": "isSupplementTo", "resource_type": "software"},
     {"identifier": "10.5281/zenodo.23549537", "relation": "references", "resource_type": "software"},
     {"identifier": "10.5270/esa-qa4lep3", "relation": "references", "resource_type": "dataset"}
   ]
