@@ -1,5 +1,5 @@
 {
- "version": "1.0.0",
+ "version": "1.1.0",
  "subject": "50000 Quaoar",
  "plates": [
   {
@@ -16,7 +16,7 @@
    "theta": -5.775,
    "pred_ra": 239.922482246,
    "pred_dec": -14.070899834,
-   "flag": "known-object check failed",
+   "flag": "",
    "time_note": "UK Schmidt: header time read as MID-exposure (not marked reportable)",
    "reportable": false,
    "header_dateobs": "1994-04-20T16:41:00",
@@ -32,7 +32,95 @@
     60
    ],
    "scale_arcsec_px": 1.0082,
-   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=413&obs-time=2449463.195139&fov-ra-center=15-59-41.40&fov-dec-center=M14-04-15.24&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "known_objects_in_box": [],
+   "known_objects": [
+    {
+     "name": "2022 SC67",
+     "dra_arcsec": -170.84,
+     "ddec_arcsec": -274.91,
+     "V": 22.32,
+     "err_arcsec": 37.616,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -18.152,
+      17.766
+     ]
+    },
+    {
+     "name": "291183 2006 AP49",
+     "dra_arcsec": -248.99,
+     "ddec_arcsec": -240.21,
+     "V": 21.05,
+     "err_arcsec": 3.197,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -22.3754,
+      4.401
+     ]
+    },
+    {
+     "name": "2015 RU357",
+     "dra_arcsec": -315.54,
+     "ddec_arcsec": 348.17,
+     "V": 22.26,
+     "err_arcsec": 2.219,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -19.8234,
+      10.51
+     ]
+    },
+    {
+     "name": "2014 KB146",
+     "dra_arcsec": 539.04,
+     "ddec_arcsec": -126.45,
+     "V": 21.71,
+     "err_arcsec": 1.226,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -22.4056,
+      11.698
+     ]
+    },
+    {
+     "name": "2021 TJ43",
+     "dra_arcsec": 113.3,
+     "ddec_arcsec": 578.01,
+     "V": 23.46,
+     "err_arcsec": 2.657,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -21.0138,
+      8.944
+     ]
+    },
+    {
+     "name": "2007 VX354",
+     "dra_arcsec": -328.11,
+     "ddec_arcsec": -489.53,
+     "V": 22.78,
+     "err_arcsec": 2.772,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -19.4977,
+      6.412
+     ]
+    }
+   ],
+   "skybot_target": [
+    {
+     "name": "50000 Quaoar",
+     "dra_arcsec": -0.17,
+     "ddec_arcsec": 0.1,
+     "V": 18.91,
+     "err_arcsec": 1.687,
+     "cls": "KBO>Classical>Main",
+     "rate_arcsec_h": [
+      -2.366,
+      0.723
+     ]
+    }
+   ],
    "n_in_box": 24,
    "n_candidates": 1,
    "n_within_3sigma": 1,
@@ -75,7 +163,7 @@
    "theta": -9.957,
    "pred_ra": 223.350064359,
    "pred_dec": -11.525646206,
-   "flag": "known-object check failed",
+   "flag": "",
    "time_note": "UK Schmidt: header time read as MID-exposure (not marked reportable)",
    "reportable": false,
    "header_dateobs": "1982-07-17T09:22",
@@ -91,7 +179,299 @@
     60
    ],
    "scale_arcsec_px": 1.6992,
-   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=413&obs-time=2445167.890278&fov-ra-center=14-53-24.02&fov-dec-center=M11-31-32.33&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "known_objects_in_box": [],
+   "known_objects": [
+    {
+     "name": "59996 1999 TZ",
+     "dra_arcsec": 67.72,
+     "ddec_arcsec": 22.46,
+     "V": 20.43,
+     "err_arcsec": 1.671,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      7.0455,
+      -4.834
+     ]
+    },
+    {
+     "name": "2012 TA399",
+     "dra_arcsec": -73.53,
+     "ddec_arcsec": -59.77,
+     "V": 24.13,
+     "err_arcsec": 69.286,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      4.796,
+      1.469
+     ]
+    },
+    {
+     "name": "555639 2014 BU66",
+     "dra_arcsec": 52.42,
+     "ddec_arcsec": 154.49,
+     "V": 22.86,
+     "err_arcsec": 7.917,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      10.3296,
+      -9.464
+     ]
+    },
+    {
+     "name": "2015 PG359",
+     "dra_arcsec": -51.12,
+     "ddec_arcsec": -178.31,
+     "V": 23.21,
+     "err_arcsec": 7660.06,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      8.8241,
+      -9.552
+     ]
+    },
+    {
+     "name": "2014 VF45",
+     "dra_arcsec": 177.63,
+     "ddec_arcsec": -205.13,
+     "V": 24.0,
+     "err_arcsec": 44.607,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      3.6272,
+      -4.991
+     ]
+    },
+    {
+     "name": "19671 1999 RX151",
+     "dra_arcsec": -231.95,
+     "ddec_arcsec": 257.5,
+     "V": 18.31,
+     "err_arcsec": 0.351,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      10.7663,
+      -8.572
+     ]
+    },
+    {
+     "name": "725442 2008 XM40",
+     "dra_arcsec": -364.52,
+     "ddec_arcsec": 111.4,
+     "V": 21.73,
+     "err_arcsec": 3.747,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      15.7072,
+      -5.76
+     ]
+    },
+    {
+     "name": "709812 2013 GE95",
+     "dra_arcsec": -10.47,
+     "ddec_arcsec": -387.22,
+     "V": 21.38,
+     "err_arcsec": 3.9,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      36.926,
+      -21.761
+     ]
+    },
+    {
+     "name": "P/NEAT 166P",
+     "dra_arcsec": 23.13,
+     "ddec_arcsec": -396.47,
+     "V": 24.51,
+     "err_arcsec": 0.43,
+     "cls": "Comet",
+     "rate_arcsec_h": [
+      -1.5705,
+      -0.611
+     ]
+    },
+    {
+     "name": "709630 2013 CR217",
+     "dra_arcsec": -265.23,
+     "ddec_arcsec": 317.01,
+     "V": 22.42,
+     "err_arcsec": 2.033,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      11.2055,
+      -6.559
+     ]
+    },
+    {
+     "name": "2013 TT140",
+     "dra_arcsec": 184.3,
+     "ddec_arcsec": 386.68,
+     "V": 22.62,
+     "err_arcsec": 0.028,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      15.4521,
+      -9.011
+     ]
+    },
+    {
+     "name": "2018 BW90",
+     "dra_arcsec": 434.28,
+     "ddec_arcsec": -64.16,
+     "V": 24.36,
+     "err_arcsec": 70330.605,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      16.8214,
+      -13.096
+     ]
+    },
+    {
+     "name": "89351 2001 VB75",
+     "dra_arcsec": -333.47,
+     "ddec_arcsec": -295.59,
+     "V": 19.43,
+     "err_arcsec": 0.407,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      13.8957,
+      -15.649
+     ]
+    },
+    {
+     "name": "459654 2013 KY3",
+     "dra_arcsec": -244.63,
+     "ddec_arcsec": 384.38,
+     "V": 21.3,
+     "err_arcsec": 1.371,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      6.8117,
+      -11.795
+     ]
+    },
+    {
+     "name": "40260 1999 CU98",
+     "dra_arcsec": 425.41,
+     "ddec_arcsec": 205.08,
+     "V": 19.59,
+     "err_arcsec": 1.16,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      10.8414,
+      -11.801
+     ]
+    },
+    {
+     "name": "488989 2005 UH382",
+     "dra_arcsec": -226.38,
+     "ddec_arcsec": 437.43,
+     "V": 21.19,
+     "err_arcsec": 0.341,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      6.7054,
+      -17.513
+     ]
+    },
+    {
+     "name": "290981 2005 XZ42",
+     "dra_arcsec": -428.46,
+     "ddec_arcsec": 286.49,
+     "V": 22.09,
+     "err_arcsec": 2.178,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      8.3123,
+      -3.329
+     ]
+    },
+    {
+     "name": "2014 SY209",
+     "dra_arcsec": 567.05,
+     "ddec_arcsec": 129.73,
+     "V": 22.01,
+     "err_arcsec": 3.581,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      16.0743,
+      -18.685
+     ]
+    },
+    {
+     "name": "63698 2001 QK179",
+     "dra_arcsec": -269.58,
+     "ddec_arcsec": 554.7,
+     "V": 20.57,
+     "err_arcsec": 0.683,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      3.1295,
+      -5.397
+     ]
+    },
+    {
+     "name": "2014 JH9",
+     "dra_arcsec": 632.45,
+     "ddec_arcsec": -17.84,
+     "V": 22.16,
+     "err_arcsec": 1.296,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      27.4167,
+      -10.583
+     ]
+    },
+    {
+     "name": "2010 VX108",
+     "dra_arcsec": -528.62,
+     "ddec_arcsec": -397.54,
+     "V": 23.11,
+     "err_arcsec": 10.278,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      7.8744,
+      -6.182
+     ]
+    },
+    {
+     "name": "35740 1999 GK24",
+     "dra_arcsec": -613.32,
+     "ddec_arcsec": -250.93,
+     "V": 18.94,
+     "err_arcsec": 1.869,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      30.5213,
+      -15.815
+     ]
+    },
+    {
+     "name": "252409 2001 TN93",
+     "dra_arcsec": 603.26,
+     "ddec_arcsec": 288.6,
+     "V": 21.09,
+     "err_arcsec": 0.085,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      11.0088,
+      0.037
+     ]
+    }
+   ],
+   "skybot_target": [
+    {
+     "name": "50000 Quaoar",
+     "dra_arcsec": -0.36,
+     "ddec_arcsec": 0.17,
+     "V": 19.01,
+     "err_arcsec": 2.199,
+     "cls": "KBO>Classical>Main",
+     "rate_arcsec_h": [
+      -0.6835,
+      -0.022
+     ]
+    }
+   ],
    "n_in_box": 13,
    "n_candidates": 3,
    "n_within_3sigma": 1,

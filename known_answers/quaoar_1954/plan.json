@@ -26,7 +26,8 @@
   "rate": 1.571233001455863,
   "dra_rate": -1.43306,
   "ddec_rate": 0.644292,
-  "on_plate": true
+  "on_plate": true,
+  "target_name": "50000 Quaoar (2002 LM60)"
  },
  {
   "survey": "poss1_red",
@@ -55,7 +56,8 @@
   "rate": 2.3236526865108305,
   "dra_rate": -2.13066,
   "ddec_rate": 0.927173,
-  "on_plate": true
+  "on_plate": true,
+  "target_name": "50000 Quaoar (2002 LM60)"
  },
  {
   "survey": "poss1_blue",
@@ -84,7 +86,8 @@
   "rate": 1.5693946388149156,
   "dra_rate": -1.43105,
   "ddec_rate": 0.644279,
-  "on_plate": true
+  "on_plate": true,
+  "target_name": "50000 Quaoar (2002 LM60)"
  },
  {
   "survey": "poss1_blue",
@@ -113,6 +116,7 @@
   "rate": 2.322948341794109,
   "dra_rate": -2.12982,
   "ddec_rate": 0.927338,
-  "on_plate": true
+  "on_plate": true,
+  "target_name": "50000 Quaoar (2002 LM60)"
  }
 ]

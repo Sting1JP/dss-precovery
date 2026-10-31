@@ -2,9 +2,9 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "dss-precovery: Precovery of Known Distant Solar System Objects on Digitized Sky Survey Plates"
-version: 1.0.0
-doi: 10.5281/zenodo.23805409
-date-released: 2026-10-30
+version: 1.1.0
+doi: 10.5281/zenodo.23833587
+date-released: 2026-10-31
 authors:
   - family-names: Stinga
     given-names: Stefano Ivan
@@ -17,8 +17,8 @@ abstract: >-
   A Python tool that looks for a known, slow-moving Solar System object on the Digitized Sky Survey scans of old
   photographic plates (POSS-I and UK Schmidt) and measures its positions. It finds the plates taken while the
   object was on them, refits each plate's astrometry to Gaia DR3, searches the JPL Horizons uncertainty region,
-  rejects stars, plate flaws and sources seen on plates from other dates (POSS-II included), and
-  fits blended neighbors jointly. It includes an offline self-test, three known-answer tests (Quaoar and Eris)
+  rejects stars, plate flaws, known asteroids and comets (SkyBoT) and sources seen on plates from other dates
+  (POSS-II included), and fits blended neighbors jointly. It includes an offline self-test, three known-answer tests (Quaoar and Eris)
   with their results, and D. Hill's POSS-I plate dates and clock corrections (CC BY 4.0).
 keywords:
   - precovery
@@ -30,6 +30,7 @@ keywords:
   - trans-Neptunian objects
   - Gaia DR3
   - JPL Horizons
+  - SkyBoT
 references:
   - type: software
     title: "POSS Transients Re-examined: a re-analysis of the VASCO POSS-I transient results"
@@ -43,3 +44,27 @@ references:
     license:
       - MIT
       - CC-BY-4.0
+  - type: conference-paper
+    title: "SkyBoT, a new VO service to identify Solar System objects"
+    authors:
+      - family-names: Berthier
+        given-names: J.
+      - family-names: Vachier
+        given-names: F.
+      - family-names: Thuillot
+        given-names: W.
+      - family-names: Fernique
+        given-names: P.
+      - family-names: Ochsenbein
+        given-names: F.
+      - family-names: Genova
+        given-names: F.
+      - family-names: Lainey
+        given-names: V.
+      - family-names: Arlot
+        given-names: J.-E.
+    year: 2006
+    collection-title: "Astronomical Data Analysis Software and Systems XV"
+    collection-type: proceedings
+    volume: 351
+    start: 367

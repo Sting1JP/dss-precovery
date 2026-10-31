@@ -1,4 +1,4 @@
-tool version 1.0.0, 2 plates in plan, 2 measured
+tool version 1.1.0, 2 plates in plan, 2 measured
 
 poss2ukstu_ir_IS655_A49I  mid 1994-04-20T16:41:00  exp 90.0 min  V 18.89  status ok
   nearest source: +0.52" -0.18"  snr 10.5  mag 19.29  rejected=''  gaia star within 10.1"

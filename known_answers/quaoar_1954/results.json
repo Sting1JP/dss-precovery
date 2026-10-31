@@ -1,5 +1,5 @@
 {
- "version": "1.0.0",
+ "version": "1.1.0",
  "subject": "50000 Quaoar",
  "plates": [
   {
@@ -16,9 +16,9 @@
    "theta": -14.823,
    "pred_ra": 190.355485948,
    "pred_dec": -3.962120832,
-   "flag": "known-object check failed",
+   "flag": "",
    "time_note": "POSS-I: hours+hundredths, start, clock -0.80 min (survey median); date +1 d from Hill 2026 (Palomar log)",
-   "reportable": false,
+   "reportable": true,
    "header_dateobs": "1954-05-24T04:17:00",
    "clock_sigma_min": 0.6,
    "uncertainty_source": "Horizons 3-sigma ellipse",
@@ -32,7 +32,313 @@
     138
    ],
    "scale_arcsec_px": 1.6998,
-   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=675&obs-time=2434887.688819&fov-ra-center=12-41-25.32&fov-dec-center=M03-57-43.63&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "known_objects_in_box": [
+    "409671 2005 YY236"
+   ],
+   "known_objects": [
+    {
+     "name": "409671 2005 YY236",
+     "dra_arcsec": -27.86,
+     "ddec_arcsec": 1.87,
+     "V": 21.51,
+     "err_arcsec": 0.427,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -0.0715,
+      0.977
+     ]
+    },
+    {
+     "name": "2008 UX294",
+     "dra_arcsec": 91.66,
+     "ddec_arcsec": 248.21,
+     "V": 22.57,
+     "err_arcsec": 13.986,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -8.5744,
+      -2.665
+     ]
+    },
+    {
+     "name": "100483 NAOJ",
+     "dra_arcsec": 53.72,
+     "ddec_arcsec": 321.82,
+     "V": 20.99,
+     "err_arcsec": 0.707,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -7.2693,
+      -0.064
+     ]
+    },
+    {
+     "name": "162052 1996 TB10",
+     "dra_arcsec": -273.75,
+     "ddec_arcsec": 179.0,
+     "V": 21.02,
+     "err_arcsec": 1.349,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -7.0392,
+      3.489
+     ]
+    },
+    {
+     "name": "616346 2005 TH180",
+     "dra_arcsec": 293.2,
+     "ddec_arcsec": -162.04,
+     "V": 22.0,
+     "err_arcsec": 1.888,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -9.7031,
+      -2.582
+     ]
+    },
+    {
+     "name": "19798 2000 RP51",
+     "dra_arcsec": 170.11,
+     "ddec_arcsec": 323.2,
+     "V": 19.35,
+     "err_arcsec": 2.12,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -5.2371,
+      0.518
+     ]
+    },
+    {
+     "name": "426529 2013 RX58",
+     "dra_arcsec": -287.3,
+     "ddec_arcsec": 282.05,
+     "V": 21.74,
+     "err_arcsec": 6.603,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -3.5918,
+      5.721
+     ]
+    },
+    {
+     "name": "2014 HM307",
+     "dra_arcsec": -155.71,
+     "ddec_arcsec": 376.48,
+     "V": 22.0,
+     "err_arcsec": 1.715,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      0.4752,
+      3.337
+     ]
+    },
+    {
+     "name": "2014 SM98",
+     "dra_arcsec": 377.65,
+     "ddec_arcsec": 282.57,
+     "V": 22.93,
+     "err_arcsec": 54895100.0,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -5.6002,
+      2.886
+     ]
+    },
+    {
+     "name": "2008 SL202",
+     "dra_arcsec": -362.98,
+     "ddec_arcsec": -329.26,
+     "V": 23.27,
+     "err_arcsec": 10.983,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -12.1793,
+      -2.429
+     ]
+    },
+    {
+     "name": "2013 HW113",
+     "dra_arcsec": 290.97,
+     "ddec_arcsec": -403.61,
+     "V": 22.51,
+     "err_arcsec": 3.853,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -1.3205,
+      2.99
+     ]
+    },
+    {
+     "name": "2016 JZ82",
+     "dra_arcsec": -359.64,
+     "ddec_arcsec": -372.16,
+     "V": 22.79,
+     "err_arcsec": 1.814,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -3.9253,
+      9.263
+     ]
+    },
+    {
+     "name": "2008 XW11",
+     "dra_arcsec": 140.34,
+     "ddec_arcsec": -516.43,
+     "V": 23.38,
+     "err_arcsec": 597.692,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -8.5794,
+      0.249
+     ]
+    },
+    {
+     "name": "282422 2003 UF322",
+     "dra_arcsec": -318.14,
+     "ddec_arcsec": 446.12,
+     "V": 21.42,
+     "err_arcsec": 1.966,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -2.1688,
+      5.309
+     ]
+    },
+    {
+     "name": "188024 2001 UO71",
+     "dra_arcsec": -346.48,
+     "ddec_arcsec": -445.04,
+     "V": 20.64,
+     "err_arcsec": 3.869,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -1.7945,
+      9.184
+     ]
+    },
+    {
+     "name": "220120 2002 TU52",
+     "dra_arcsec": -618.08,
+     "ddec_arcsec": -15.92,
+     "V": 21.8,
+     "err_arcsec": 0.867,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -6.394,
+      5.225
+     ]
+    },
+    {
+     "name": "79378 1997 FF1",
+     "dra_arcsec": 37.9,
+     "ddec_arcsec": -618.46,
+     "V": 18.88,
+     "err_arcsec": 1.188,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      2.3116,
+      -8.0
+     ]
+    },
+    {
+     "name": "2021 CZ16",
+     "dra_arcsec": -497.01,
+     "ddec_arcsec": 402.11,
+     "V": 22.26,
+     "err_arcsec": 10.797,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      5.9541,
+      -10.357
+     ]
+    },
+    {
+     "name": "133710 2003 UJ247",
+     "dra_arcsec": -262.48,
+     "ddec_arcsec": 595.97,
+     "V": 21.17,
+     "err_arcsec": 2.843,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -4.5891,
+      1.097
+     ]
+    },
+    {
+     "name": "166742 2002 TO297",
+     "dra_arcsec": 91.45,
+     "ddec_arcsec": -683.98,
+     "V": 20.37,
+     "err_arcsec": 0.389,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -6.7735,
+      -0.79
+     ]
+    },
+    {
+     "name": "2006 TH144",
+     "dra_arcsec": 701.21,
+     "ddec_arcsec": 55.05,
+     "V": 23.41,
+     "err_arcsec": 13.203,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -9.1901,
+      -1.178
+     ]
+    },
+    {
+     "name": "2015 RE288",
+     "dra_arcsec": -367.77,
+     "ddec_arcsec": -643.36,
+     "V": 23.3,
+     "err_arcsec": 3.804,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -7.9704,
+      1.351
+     ]
+    },
+    {
+     "name": "2021 UN56",
+     "dra_arcsec": -260.61,
+     "ddec_arcsec": -701.61,
+     "V": 23.14,
+     "err_arcsec": 279125.5,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -3.7562,
+      9.958
+     ]
+    },
+    {
+     "name": "462319 2008 HA21",
+     "dra_arcsec": -385.23,
+     "ddec_arcsec": 676.54,
+     "V": 20.77,
+     "err_arcsec": 3.808,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      12.9444,
+      15.638
+     ]
+    }
+   ],
+   "skybot_target": [
+    {
+     "name": "50000 Quaoar",
+     "dra_arcsec": -0.57,
+     "ddec_arcsec": 0.27,
+     "V": 19.04,
+     "err_arcsec": 3.637,
+     "cls": "KBO>Classical>Main",
+     "rate_arcsec_h": [
+      -1.4334,
+      0.643
+     ]
+    }
+   ],
    "n_in_box": 26,
    "n_candidates": 12,
    "n_within_3sigma": 1,
@@ -75,9 +381,9 @@
    "theta": -14.595,
    "pred_ra": 192.882078707,
    "pred_dec": -4.670700904,
-   "flag": "known-object check failed",
+   "flag": "",
    "time_note": "POSS-I: hours+hundredths, start, clock -0.80 min (survey median); date +1 d from Hill 2026 (Palomar log)",
-   "reportable": false,
+   "reportable": true,
    "header_dateobs": "1956-05-07T05:07:00",
    "clock_sigma_min": 0.6,
    "uncertainty_source": "Horizons 3-sigma ellipse",
@@ -91,7 +397,227 @@
     138
    ],
    "scale_arcsec_px": 1.7001,
-   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=675&obs-time=2435601.726319&fov-ra-center=12-51-31.70&fov-dec-center=M04-40-14.52&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "known_objects_in_box": [],
+   "known_objects": [
+    {
+     "name": "2023 AH4",
+     "dra_arcsec": -168.6,
+     "ddec_arcsec": 16.03,
+     "V": 23.45,
+     "err_arcsec": 75580.55,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -16.1257,
+      13.617
+     ]
+    },
+    {
+     "name": "478069 2011 UA7",
+     "dra_arcsec": 98.65,
+     "ddec_arcsec": -156.01,
+     "V": 22.46,
+     "err_arcsec": 3.274,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -18.9797,
+      6.213
+     ]
+    },
+    {
+     "name": "2020 QK39",
+     "dra_arcsec": 9.7,
+     "ddec_arcsec": 249.89,
+     "V": 22.26,
+     "err_arcsec": 8.703,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -24.8905,
+      2.222
+     ]
+    },
+    {
+     "name": "603303 2015 BV294",
+     "dra_arcsec": 227.88,
+     "ddec_arcsec": 168.52,
+     "V": 22.13,
+     "err_arcsec": 0.483,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -20.3529,
+      16.366
+     ]
+    },
+    {
+     "name": "2017 SO",
+     "dra_arcsec": -266.49,
+     "ddec_arcsec": -112.43,
+     "V": 23.44,
+     "err_arcsec": 417508.5,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -24.5879,
+      0.332
+     ]
+    },
+    {
+     "name": "2019 VG3",
+     "dra_arcsec": 241.3,
+     "ddec_arcsec": 199.4,
+     "V": 33.9,
+     "err_arcsec": 1677534.5,
+     "cls": "NEA>Apollo",
+     "rate_arcsec_h": [
+      -24.0716,
+      8.833
+     ]
+    },
+    {
+     "name": "494902 2008 UO213",
+     "dra_arcsec": -69.29,
+     "ddec_arcsec": 327.54,
+     "V": 22.17,
+     "err_arcsec": 3.385,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -19.6117,
+      4.356
+     ]
+    },
+    {
+     "name": "547300 2010 JN155",
+     "dra_arcsec": 35.68,
+     "ddec_arcsec": -486.29,
+     "V": 21.18,
+     "err_arcsec": 0.792,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -14.3444,
+      9.841
+     ]
+    },
+    {
+     "name": "2008 TB82",
+     "dra_arcsec": 101.56,
+     "ddec_arcsec": -496.41,
+     "V": 24.0,
+     "err_arcsec": 347.307,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -21.5201,
+      8.858
+     ]
+    },
+    {
+     "name": "215483 2002 TA33",
+     "dra_arcsec": 416.59,
+     "ddec_arcsec": -379.89,
+     "V": 21.0,
+     "err_arcsec": 3.772,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -21.4676,
+      5.788
+     ]
+    },
+    {
+     "name": "2001 SP263",
+     "dra_arcsec": 111.8,
+     "ddec_arcsec": 594.2,
+     "V": 30.21,
+     "err_arcsec": 11645240.0,
+     "cls": "NEA>Apollo",
+     "rate_arcsec_h": [
+      -27.1904,
+      11.134
+     ]
+    },
+    {
+     "name": "2015 VX97",
+     "dra_arcsec": 603.65,
+     "ddec_arcsec": 183.8,
+     "V": 23.65,
+     "err_arcsec": 1.317,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -22.4438,
+      6.669
+     ]
+    },
+    {
+     "name": "2017 QQ76",
+     "dra_arcsec": -620.72,
+     "ddec_arcsec": -158.1,
+     "V": 23.84,
+     "err_arcsec": 11.808,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -22.7544,
+      2.592
+     ]
+    },
+    {
+     "name": "265668 2005 UQ37",
+     "dra_arcsec": -375.0,
+     "ddec_arcsec": -539.35,
+     "V": 21.48,
+     "err_arcsec": 1.687,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -19.2154,
+      8.625
+     ]
+    },
+    {
+     "name": "2011 CY87",
+     "dra_arcsec": 671.66,
+     "ddec_arcsec": 175.9,
+     "V": 21.54,
+     "err_arcsec": 8.691,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -15.1638,
+      7.999
+     ]
+    },
+    {
+     "name": "2016 UD244",
+     "dra_arcsec": -715.01,
+     "ddec_arcsec": -143.81,
+     "V": 24.02,
+     "err_arcsec": 37560750.0,
+     "cls": "MB>Cybele",
+     "rate_arcsec_h": [
+      -16.1156,
+      6.47
+     ]
+    },
+    {
+     "name": "382904 2004 RT81",
+     "dra_arcsec": -516.74,
+     "ddec_arcsec": -573.13,
+     "V": 22.26,
+     "err_arcsec": 6.823,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -19.2196,
+      9.782
+     ]
+    }
+   ],
+   "skybot_target": [
+    {
+     "name": "50000 Quaoar",
+     "dra_arcsec": -0.59,
+     "ddec_arcsec": 0.27,
+     "V": 19.01,
+     "err_arcsec": 3.536,
+     "cls": "KBO>Classical>Main",
+     "rate_arcsec_h": [
+      -2.1313,
+      0.925
+     ]
+    }
+   ],
    "n_in_box": 29,
    "n_candidates": 7,
    "n_within_3sigma": 1,
@@ -134,9 +660,9 @@
    "theta": -14.823,
    "pred_ra": 190.35524662,
    "pred_dec": -3.962013646,
-   "flag": "known-object check failed",
+   "flag": "",
    "time_note": "POSS-I: hours+hundredths, start, clock -0.80 min (survey median); date +1 d from Hill 2026 (Palomar log)",
-   "reportable": false,
+   "reportable": true,
    "header_dateobs": "1954-05-24T05:02:00",
    "clock_sigma_min": 0.6,
    "uncertainty_source": "Horizons 3-sigma ellipse",
@@ -150,9 +676,315 @@
     138
    ],
    "scale_arcsec_px": 1.0083,
-   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=675&obs-time=2434887.713819&fov-ra-center=12-41-25.26&fov-dec-center=M03-57-43.25&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "known_objects_in_box": [
+    "409671 2005 YY236"
+   ],
+   "known_objects": [
+    {
+     "name": "409671 2005 YY236",
+     "dra_arcsec": -27.03,
+     "ddec_arcsec": 2.07,
+     "V": 21.51,
+     "err_arcsec": 0.427,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -0.029,
+      0.978
+     ]
+    },
+    {
+     "name": "2008 UX294",
+     "dra_arcsec": 87.38,
+     "ddec_arcsec": 246.23,
+     "V": 22.57,
+     "err_arcsec": 13.986,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -8.534,
+      -2.664
+     ]
+    },
+    {
+     "name": "100483 NAOJ",
+     "dra_arcsec": 50.23,
+     "ddec_arcsec": 321.39,
+     "V": 20.99,
+     "err_arcsec": 0.707,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -7.2323,
+      -0.064
+     ]
+    },
+    {
+     "name": "162052 1996 TB10",
+     "dra_arcsec": -277.1,
+     "ddec_arcsec": 180.71,
+     "V": 21.02,
+     "err_arcsec": 1.349,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -6.9932,
+      3.488
+     ]
+    },
+    {
+     "name": "616346 2005 TH180",
+     "dra_arcsec": 288.24,
+     "ddec_arcsec": -163.97,
+     "V": 22.0,
+     "err_arcsec": 1.888,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -9.6637,
+      -2.581
+     ]
+    },
+    {
+     "name": "19798 2000 RP51",
+     "dra_arcsec": 167.83,
+     "ddec_arcsec": 323.12,
+     "V": 19.35,
+     "err_arcsec": 2.12,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -5.2025,
+      0.518
+     ]
+    },
+    {
+     "name": "426529 2013 RX58",
+     "dra_arcsec": -288.59,
+     "ddec_arcsec": 285.09,
+     "V": 21.74,
+     "err_arcsec": 6.603,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -3.5582,
+      5.719
+     ]
+    },
+    {
+     "name": "2014 HM307",
+     "dra_arcsec": -154.55,
+     "ddec_arcsec": 378.09,
+     "V": 22.0,
+     "err_arcsec": 1.715,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      0.5373,
+      3.337
+     ]
+    },
+    {
+     "name": "2014 SM98",
+     "dra_arcsec": 375.16,
+     "ddec_arcsec": 283.92,
+     "V": 22.93,
+     "err_arcsec": 54895100.0,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -5.5643,
+      2.885
+     ]
+    },
+    {
+     "name": "2008 SL202",
+     "dra_arcsec": -369.42,
+     "ddec_arcsec": -331.1,
+     "V": 23.27,
+     "err_arcsec": 10.983,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -12.1493,
+      -2.428
+     ]
+    },
+    {
+     "name": "2013 HW113",
+     "dra_arcsec": 291.05,
+     "ddec_arcsec": -402.2,
+     "V": 22.51,
+     "err_arcsec": 3.853,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -1.2771,
+      2.99
+     ]
+    },
+    {
+     "name": "2016 JZ82",
+     "dra_arcsec": -361.13,
+     "ddec_arcsec": -366.99,
+     "V": 22.79,
+     "err_arcsec": 1.814,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -3.8921,
+      9.261
+     ]
+    },
+    {
+     "name": "2008 XW11",
+     "dra_arcsec": 136.06,
+     "ddec_arcsec": -516.67,
+     "V": 23.38,
+     "err_arcsec": 597.692,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -8.5405,
+      0.25
+     ]
+    },
+    {
+     "name": "282422 2003 UF322",
+     "dra_arcsec": -318.58,
+     "ddec_arcsec": 448.92,
+     "V": 21.42,
+     "err_arcsec": 1.966,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -2.1286,
+      5.308
+     ]
+    },
+    {
+     "name": "188024 2001 UO71",
+     "dra_arcsec": -346.68,
+     "ddec_arcsec": -439.92,
+     "V": 20.64,
+     "err_arcsec": 3.869,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -1.7496,
+      9.183
+     ]
+    },
+    {
+     "name": "220120 2002 TU52",
+     "dra_arcsec": -621.05,
+     "ddec_arcsec": -13.17,
+     "V": 21.8,
+     "err_arcsec": 0.867,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -6.3524,
+      5.224
+     ]
+    },
+    {
+     "name": "79378 1997 FF1",
+     "dra_arcsec": 40.16,
+     "ddec_arcsec": -623.64,
+     "V": 18.88,
+     "err_arcsec": 1.188,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      2.3748,
+      -7.995
+     ]
+    },
+    {
+     "name": "2021 CZ16",
+     "dra_arcsec": -492.56,
+     "ddec_arcsec": 395.52,
+     "V": 22.26,
+     "err_arcsec": 10.797,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      6.0152,
+      -10.351
+     ]
+    },
+    {
+     "name": "133710 2003 UJ247",
+     "dra_arcsec": -264.36,
+     "ddec_arcsec": 596.25,
+     "V": 21.17,
+     "err_arcsec": 2.843,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -4.5498,
+      1.096
+     ]
+    },
+    {
+     "name": "166742 2002 TO297",
+     "dra_arcsec": 88.26,
+     "ddec_arcsec": -684.84,
+     "V": 20.37,
+     "err_arcsec": 0.389,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -6.7343,
+      -0.789
+     ]
+    },
+    {
+     "name": "2006 TH144",
+     "dra_arcsec": 696.57,
+     "ddec_arcsec": 53.96,
+     "V": 23.41,
+     "err_arcsec": 13.203,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -9.1498,
+      -1.177
+     ]
+    },
+    {
+     "name": "2015 RE288",
+     "dra_arcsec": -371.68,
+     "ddec_arcsec": -642.94,
+     "V": 23.3,
+     "err_arcsec": 3.804,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -7.9279,
+      1.351
+     ]
+    },
+    {
+     "name": "2021 UN56",
+     "dra_arcsec": -262.0,
+     "ddec_arcsec": -696.02,
+     "V": 23.14,
+     "err_arcsec": 279125.5,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -3.7218,
+      9.956
+     ]
+    },
+    {
+     "name": "462319 2008 HA21",
+     "dra_arcsec": -376.59,
+     "ddec_arcsec": 685.54,
+     "V": 20.77,
+     "err_arcsec": 3.808,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      13.0046,
+      15.634
+     ]
+    }
+   ],
+   "skybot_target": [
+    {
+     "name": "50000 Quaoar",
+     "dra_arcsec": -0.57,
+     "ddec_arcsec": 0.27,
+     "V": 19.04,
+     "err_arcsec": 3.637,
+     "cls": "KBO>Classical>Main",
+     "rate_arcsec_h": [
+      -1.4314,
+      0.643
+     ]
+    }
+   ],
    "n_in_box": 55,
-   "n_candidates": 36,
+   "n_candidates": 35,
    "n_within_3sigma": 1,
    "rate_arcsec_h": 1.569,
    "half_exposure_shift_arcsec": 0.2,
@@ -193,9 +1025,9 @@
    "theta": -14.595,
    "pred_ra": 192.881780753,
    "pred_dec": -4.670571963,
-   "flag": "known-object check failed",
+   "flag": "",
    "time_note": "POSS-I: hours+hundredths, start, clock -0.80 min (survey median); date +1 d from Hill 2026 (Palomar log)",
-   "reportable": false,
+   "reportable": true,
    "header_dateobs": "1956-05-07T05:88:00",
    "clock_sigma_min": 0.6,
    "uncertainty_source": "Horizons 3-sigma ellipse",
@@ -209,7 +1041,251 @@
     138
    ],
    "scale_arcsec_px": 1.0082,
-   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=675&obs-time=2435601.747222&fov-ra-center=12-51-31.63&fov-dec-center=M04-40-14.06&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "known_objects_in_box": [],
+   "known_objects": [
+    {
+     "name": "2023 AH4",
+     "dra_arcsec": -175.62,
+     "ddec_arcsec": 22.39,
+     "V": 23.45,
+     "err_arcsec": 75580.55,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -16.0967,
+      13.62
+     ]
+    },
+    {
+     "name": "478069 2011 UA7",
+     "dra_arcsec": 90.14,
+     "ddec_arcsec": -153.33,
+     "V": 22.46,
+     "err_arcsec": 2.325,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -18.9637,
+      6.215
+     ]
+    },
+    {
+     "name": "2020 QK39",
+     "dra_arcsec": -0.74,
+     "ddec_arcsec": 249.98,
+     "V": 22.27,
+     "err_arcsec": 4.002,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -24.8656,
+      2.227
+     ]
+    },
+    {
+     "name": "603303 2015 BV294",
+     "dra_arcsec": 219.2,
+     "ddec_arcsec": 176.17,
+     "V": 22.15,
+     "err_arcsec": 1.179,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -20.3298,
+      16.368
+     ]
+    },
+    {
+     "name": "2017 SO",
+     "dra_arcsec": -277.75,
+     "ddec_arcsec": -112.73,
+     "V": 23.44,
+     "err_arcsec": 417508.5,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -24.5676,
+      0.336
+     ]
+    },
+    {
+     "name": "2019 VG3",
+     "dra_arcsec": 230.29,
+     "ddec_arcsec": 203.37,
+     "V": 33.9,
+     "err_arcsec": 1677534.5,
+     "cls": "NEA>Apollo",
+     "rate_arcsec_h": [
+      -24.0574,
+      8.834
+     ]
+    },
+    {
+     "name": "494902 2008 UO213",
+     "dra_arcsec": -77.95,
+     "ddec_arcsec": 329.19,
+     "V": 22.17,
+     "err_arcsec": 6.057,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -19.5958,
+      4.358
+     ]
+    },
+    {
+     "name": "2015 FG506",
+     "dra_arcsec": 154.53,
+     "ddec_arcsec": 354.02,
+     "V": 24.5,
+     "err_arcsec": 1510231.5,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -19.4562,
+      8.955
+     ]
+    },
+    {
+     "name": "547300 2010 JN155",
+     "dra_arcsec": 29.61,
+     "ddec_arcsec": -481.86,
+     "V": 21.2,
+     "err_arcsec": 1.592,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -14.3156,
+      9.846
+     ]
+    },
+    {
+     "name": "2008 TB82",
+     "dra_arcsec": 91.84,
+     "ddec_arcsec": -492.42,
+     "V": 24.0,
+     "err_arcsec": 347.307,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -21.4974,
+      8.861
+     ]
+    },
+    {
+     "name": "215483 2002 TA33",
+     "dra_arcsec": 406.42,
+     "ddec_arcsec": -377.19,
+     "V": 21.0,
+     "err_arcsec": 0.082,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -21.4452,
+      5.792
+     ]
+    },
+    {
+     "name": "2001 SP263",
+     "dra_arcsec": 99.24,
+     "ddec_arcsec": 599.32,
+     "V": 30.21,
+     "err_arcsec": 11645240.0,
+     "cls": "NEA>Apollo",
+     "rate_arcsec_h": [
+      -27.1673,
+      11.135
+     ]
+    },
+    {
+     "name": "2015 VX97",
+     "dra_arcsec": 593.46,
+     "ddec_arcsec": 186.69,
+     "V": 23.65,
+     "err_arcsec": 1.317,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -22.421,
+      6.673
+     ]
+    },
+    {
+     "name": "2017 QQ76",
+     "dra_arcsec": -631.06,
+     "ddec_arcsec": -157.26,
+     "V": 23.84,
+     "err_arcsec": 11.808,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -22.739,
+      2.594
+     ]
+    },
+    {
+     "name": "2022 TY7",
+     "dra_arcsec": -176.79,
+     "ddec_arcsec": 629.38,
+     "V": 23.41,
+     "err_arcsec": 25.241,
+     "cls": "MB>Inner",
+     "rate_arcsec_h": [
+      -26.7895,
+      5.114
+     ]
+    },
+    {
+     "name": "265668 2005 UQ37",
+     "dra_arcsec": -383.69,
+     "ddec_arcsec": -535.44,
+     "V": 21.47,
+     "err_arcsec": 1.651,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -19.1939,
+      8.628
+     ]
+    },
+    {
+     "name": "649311 2011 CY87",
+     "dra_arcsec": 665.22,
+     "ddec_arcsec": 179.41,
+     "V": 21.68,
+     "err_arcsec": 0.468,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -15.1402,
+      8.002
+     ]
+    },
+    {
+     "name": "382904 2004 RT81",
+     "dra_arcsec": -525.98,
+     "ddec_arcsec": -568.45,
+     "V": 22.25,
+     "err_arcsec": 6.91,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -19.1991,
+      9.784
+     ]
+    },
+    {
+     "name": "2017 SK12",
+     "dra_arcsec": -483.58,
+     "ddec_arcsec": 628.33,
+     "V": 24.23,
+     "err_arcsec": 623413.0,
+     "cls": "NEA>Apollo",
+     "rate_arcsec_h": [
+      -4.1199,
+      -14.249
+     ]
+    }
+   ],
+   "skybot_target": [
+    {
+     "name": "50000 Quaoar",
+     "dra_arcsec": -0.59,
+     "ddec_arcsec": 0.27,
+     "V": 19.0,
+     "err_arcsec": 0.59,
+     "cls": "KBO>Classical>Main",
+     "rate_arcsec_h": [
+      -2.1305,
+      0.925
+     ]
+    }
+   ],
    "n_in_box": 24,
    "n_candidates": 6,
    "n_within_3sigma": 1,
@@ -295,8 +1371,8 @@
       200
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       3
      ]
     },
@@ -670,8 +1746,8 @@
       200
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       4
      ],
      "deblend": [
@@ -736,8 +1812,8 @@
       194
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       4
      ]
     },
@@ -798,8 +1874,8 @@
       200
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       4
      ]
     },
@@ -860,8 +1936,8 @@
       196
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       3
      ]
     },
@@ -1078,8 +2154,8 @@
       178
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       5
      ]
     },
@@ -1140,8 +2216,8 @@
       194
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       2
      ]
     },
@@ -1310,8 +2386,8 @@
       196
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       4
      ]
     },
@@ -1680,8 +2756,8 @@
       194
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       3
      ]
     },
@@ -5370,7 +6446,7 @@
       17
      ]
     },
-    "rejected": "",
+    "rejected": "known object 409671 2005 YY236",
     "note": "not shown absent on any other-date plate"
    },
    {
@@ -6743,8 +7819,8 @@
       197
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       7
      ]
     },
@@ -6913,8 +7989,8 @@
       180
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       7
      ]
     },
@@ -6975,8 +8051,8 @@
       194
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       7
      ]
     },
@@ -7391,8 +8467,8 @@
       174
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       7
      ]
     },

@@ -7,8 +7,19 @@ import json, math, sys, os
 d = sys.argv[1] if len(sys.argv) > 1 else "output/precovery/quaoar_1954"
 UKST = "--ukst" in sys.argv
 conclusive = []; mid_better = []; pulls7 = []
+
+
+def nulls_to_nan(x):
+    """results.json from version 1.1.0 on writes missing numbers as null (1.0.0 wrote NaN); read both as NaN"""
+    if isinstance(x, dict):
+        return {k: nulls_to_nan(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [nulls_to_nan(v) for v in x]
+    return float("nan") if x is None else x
+
+
 plan = {"%s_%s" % (p["survey"], p["plate"]): p for p in json.load(open(os.path.join(d, "plan.json")))}
-res = json.load(open(os.path.join(d, "results.json")))
+res = nulls_to_nan(json.load(open(os.path.join(d, "results.json"))))
 rows = res["plates"]; cands = res["candidates"]
 print("tool version %s, %d plates in plan, %d measured" % (res.get("version"), len(plan), len(rows)))
 c1 = len(plan) > 0

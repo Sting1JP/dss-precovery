@@ -1,5 +1,5 @@
 {
- "version": "1.0.0",
+ "version": "1.1.0",
  "subject": "136199 Eris",
  "plates": [
   {
@@ -16,7 +16,7 @@
    "theta": 65.256,
    "pred_ra": 22.475296056,
    "pred_dec": -9.631620102,
-   "flag": "known-object check failed",
+   "flag": "",
    "time_note": "UK Schmidt: header time read as MID-exposure (not marked reportable)",
    "reportable": false,
    "header_dateobs": "1989-09-29T14:42:00",
@@ -32,7 +32,59 @@
     60
    ],
    "scale_arcsec_px": 1.0084,
-   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=413&obs-time=2447799.112500&fov-ra-center=01-29-54.07&fov-dec-center=M09-37-53.83&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "known_objects_in_box": [],
+   "known_objects": [
+    {
+     "name": "2021 GA133",
+     "dra_arcsec": -252.88,
+     "ddec_arcsec": -55.94,
+     "V": 22.43,
+     "err_arcsec": 93.558,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -28.2726,
+      -23.543
+     ]
+    },
+    {
+     "name": "201799 2003 WL168",
+     "dra_arcsec": 515.12,
+     "ddec_arcsec": -53.4,
+     "V": 19.29,
+     "err_arcsec": 2.654,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -28.3098,
+      -16.288
+     ]
+    },
+    {
+     "name": "2022 ON82",
+     "dra_arcsec": 440.88,
+     "ddec_arcsec": 430.62,
+     "V": 22.21,
+     "err_arcsec": 1999.205,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -28.8013,
+      -11.313
+     ]
+    }
+   ],
+   "skybot_target": [
+    {
+     "name": "136199 Eris",
+     "dra_arcsec": -0.04,
+     "ddec_arcsec": 0.14,
+     "V": 18.68,
+     "err_arcsec": 0.724,
+     "cls": "KBO>Detached",
+     "rate_arcsec_h": [
+      -1.3311,
+      -0.549
+     ]
+    }
+   ],
    "n_in_box": 5,
    "n_candidates": 3,
    "n_within_3sigma": 1,
@@ -75,7 +127,7 @@
    "theta": 65.215,
    "pred_ra": 21.667665747,
    "pred_dec": -11.371282581,
-   "flag": "known-object check failed",
+   "flag": "",
    "time_note": "UK Schmidt: header time read as MID-exposure (not marked reportable)",
    "reportable": false,
    "header_dateobs": "1982-09-19T14:58",
@@ -91,7 +143,59 @@
     60
    ],
    "scale_arcsec_px": 1.6996,
-   "known_objects_in_box": "check failed: GET failed after 3 tries: https://ssd-api.jpl.nasa.gov/sb_ident.api?sb-kind=a&mpc-code=413&obs-time=2445232.123611&fov-ra-center=01-26-40.24&fov-dec-center=M11-22-16.62&fov-ra-hwidth=0.0 (HTTP Error 4",
+   "known_objects_in_box": [],
+   "known_objects": [
+    {
+     "name": "291705 2006 JE7",
+     "dra_arcsec": -358.8,
+     "ddec_arcsec": -220.51,
+     "V": 19.71,
+     "err_arcsec": 1.243,
+     "cls": "MB>Middle",
+     "rate_arcsec_h": [
+      -31.3417,
+      -6.479
+     ]
+    },
+    {
+     "name": "84889 2003 NQ8",
+     "dra_arcsec": 541.58,
+     "ddec_arcsec": -403.42,
+     "V": 17.02,
+     "err_arcsec": 3.257,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -16.0222,
+      -19.967
+     ]
+    },
+    {
+     "name": "2015 OA158",
+     "dra_arcsec": -684.29,
+     "ddec_arcsec": -1.29,
+     "V": 21.41,
+     "err_arcsec": 195.716,
+     "cls": "MB>Outer",
+     "rate_arcsec_h": [
+      -24.2461,
+      -11.386
+     ]
+    }
+   ],
+   "skybot_target": [
+    {
+     "name": "136199 Eris",
+     "dra_arcsec": 0.0,
+     "ddec_arcsec": 0.22,
+     "V": 18.69,
+     "err_arcsec": 0.862,
+     "cls": "KBO>Detached",
+     "rate_arcsec_h": [
+      -1.2426,
+      -0.604
+     ]
+    }
+   ],
    "n_in_box": 5,
    "n_candidates": 2,
    "n_within_3sigma": 1,
@@ -304,13 +408,16 @@
       199
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       0
      ]
     },
     "rejected": "",
-    "note": "not shown absent on any other-date plate"
+    "note": "not shown absent on any other-date plate; could be known object 2021 GA133 (V 22.4; its place is uncertain by 94\")",
+    "known_uncertain": [
+     "2021 GA133"
+    ]
    },
    {
     "x": 292.56,
@@ -379,7 +486,10 @@
      ]
     },
     "rejected": "",
-    "note": "not shown absent on any other-date plate"
+    "note": "not shown absent on any other-date plate; could be known object 2021 GA133 (V 22.4; its place is uncertain by 94\")",
+    "known_uncertain": [
+     "2021 GA133"
+    ]
    },
    {
     "x": 309.62,
@@ -550,8 +660,8 @@
       199
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       2
      ]
     },
@@ -688,8 +798,8 @@
       199
      ],
      "similar_refs": [
-      NaN,
-      NaN,
+      null,
+      null,
       7
      ]
     },

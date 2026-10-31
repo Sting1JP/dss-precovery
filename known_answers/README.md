@@ -10,7 +10,7 @@ Each test runs the tool on an object whose old positions are already well known 
 
 The scorer also prints how many other candidates are in the search box (C6), and the rms and largest value of the residuals divided by their errors (C7).
 
-## Results with version 1.0.0
+## Results with version 1.1.0
 
 | Test | Plates with the object | Result |
 |---|---|---|
@@ -18,9 +18,11 @@ The scorer also prints how many other candidates are in the search box (C6), and
 | Quaoar on UK Schmidt plates, 1975-2000 (`quaoar_ukst`) | 2: 1982 Jul 17, 1994 Apr 20 | PASS; 0.05-0.55"; mid-exposure time confirmed on 1 plate |
 | Eris on UK Schmidt plates, 1976-2000 (`eris_ukst`) | 2: 1982 Sep 19, 1989 Sep 29 | PASS; 0.20-0.25"; mid-exposure time confirmed on both |
 
-Run on 30 Oct 2026 on macOS with Python 3.9.6, numpy 1.26.4, scipy 1.13.1, astropy 6.0.1 and Pillow 11.3.0.
+Run on 31 Oct 2026 on macOS with Python 3.9.6, numpy 1.26.4, scipy 1.13.1, astropy 6.0.1 and Pillow 11.3.0. The positions are the same as with version 1.0.0.
 
-Each folder here holds one run: `plan.json`, `results.json`, `results.csv` and the scorer's output, `score.txt`. The DSS images are not included. No position in these runs is marked reportable: the known-object check failed, as it does on all DSS plates (see the main README), and UK Schmidt positions are never marked reportable.
+Each folder here holds one run: `plan.json`, `results.json`, `results.csv` and the scorer's output, `score.txt`. The DSS images are not included. The four POSS-I positions of Quaoar are marked reportable; UK Schmidt positions never are.
+
+The known-object check (SkyBoT) found the target on every plate, within 0.7" of JPL's position. On the 1954 blue plate it rejected one faint source 29" from Quaoar as the asteroid (409671) 2005 YY236, 6.5" from SkyBoT's position for it; that is why C6 on that plate is one lower than with version 1.0.0.
 
 JPL's orbits for Quaoar and Eris include old measurements that may come from the same scans, so an error shared with those measurements would not show in these tests.
 

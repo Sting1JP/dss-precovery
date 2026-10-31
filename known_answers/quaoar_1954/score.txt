@@ -1,4 +1,4 @@
-tool version 1.0.0, 4 plates in plan, 4 measured
+tool version 1.1.0, 4 plates in plan, 4 measured
 
 poss1_red_XE675_0DGY  mid 1954-05-25T04:31:54  exp 45.0 min  V 19.05  status ok
   nearest source: +0.35" -0.01"  snr 9.0  mag 19.42  rejected=''  gaia star within 26.3"
@@ -19,7 +19,7 @@ poss1_blue_XO675_A3Q4  mid 1954-05-25T05:07:54  exp 15.0 min  V 19.05  status ok
   C2 result field: 'unique candidate within 3 sigma'; target unique within 3 sigma: True
   C2 top candidate: True   C3 residual RA -0.20 (limit 1.78), Dec +0.13 (limit 0.74), total 0.24 (limit 2.0): pass
   C4 along-track residual: UT=start (tool) +0.24", UT=mid +0.43" (half-exposure shift 0.20", sigma 0.60"): inconclusive (shift 0.20" < 2 sigma 1.20")
-  C6 other non-rejected candidates in the box: 35
+  C6 other non-rejected candidates in the box: 34
 
 poss1_blue_XO676_A3Q5  mid 1956-05-08T05:56:00  exp 8.0 min  V 19.00  status ok
   nearest source: -0.70" +0.51"  snr 7.9  mag 19.38  rejected=''  gaia star within 19.9"

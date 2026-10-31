@@ -1,4 +1,4 @@
-tool version 1.0.0, 2 plates in plan, 2 measured
+tool version 1.1.0, 2 plates in plan, 2 measured
 
 poss2ukstu_red_ER683_A0QM  mid 1989-09-29T14:42:00  exp 70.0 min  V 18.66  status ok
   nearest source: -0.04" +0.25"  snr 28.9  mag 18.20  rejected=''  gaia star within 30.3"

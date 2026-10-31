@@ -11,8 +11,10 @@ Steps (each can be run alone; results go to output/precovery/<subject>/):
   (no step)  all three.
   --self-test  synthetic plates; no network.
 
+A subject is a file in targets/precovery/, or an object given with --object NAME --years FIRST LAST.
+
 Python 3.9+, numpy, scipy, astropy, Pillow. Network: archive.stsci.edu (DSS), ssd.jpl.nasa.gov (Horizons),
-gea.esac.esa.int (Gaia archive), ssd-api.jpl.nasa.gov (known asteroids and comets).
+gea.esac.esa.int (Gaia archive), ssp.imcce.fr (SkyBoT, for the known asteroids and comets on each plate).
 """
 import argparse, csv, datetime as dt, io, json, math, os, re, shutil, ssl, sys, time, urllib.parse, urllib.request
 
@@ -26,12 +28,12 @@ try:  # no downloads by astropy itself; only astropy.io.fits is used
 except Exception:  # noqa
     pass
 
-VERSION = "1.0.0"
-HOSTS = {"archive.stsci.edu", "ssd.jpl.nasa.gov", "ssd-api.jpl.nasa.gov", "gea.esac.esa.int"}
+VERSION = "1.1.0"
+HOSTS = {"archive.stsci.edu", "ssd.jpl.nasa.gov", "gea.esac.esa.int", "ssp.imcce.fr"}
 SAFE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]{0,80}$")
 UA = "dss-precovery/%s (+https://github.com/Sting1JP/dss-precovery)" % VERSION
 SURVEYS = ["poss1_red", "poss1_blue", "phase2_gsc1", "poss2ukstu_red", "poss2ukstu_blue", "poss2ukstu_ir", "quickv"]
-# telescope -> (Horizons site for the ephemeris, MPC code for reporting DSS measurements)
+# telescope -> (site for the ephemerides, Horizons and SkyBoT; MPC code for reporting DSS measurements)
 SITES = [("palomar", "675", "261"), ("uk 48", "413", "260"), ("uk schmidt", "413", "260"),
          ("siding", "413", "260"), ("eso", "809", "262")]
 
@@ -73,6 +75,27 @@ def http_get(url, tries=3, timeout=120, max_bytes=64 * 1024 * 1024):
                 break
             time.sleep(3 * (k + 1))
     raise RuntimeError("GET failed after %d tries: %s (%s)" % (tries, url[:160], last))
+
+
+def json_clean(x):
+    """for writing standard JSON: NaN and infinities become null, numpy numbers plain numbers, tuples lists"""
+    if isinstance(x, dict):
+        return {str(k): json_clean(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple)):
+        return [json_clean(v) for v in x]
+    if isinstance(x, np.ndarray):
+        return [json_clean(v) for v in x.tolist()]
+    if isinstance(x, np.generic):
+        x = x.item()
+    if isinstance(x, float) and not math.isfinite(x):
+        return None
+    return x
+
+
+def write_json(path, obj):
+    with open(path + ".part", "w") as f:
+        json.dump(json_clean(obj), f, indent=1, default=str, allow_nan=False)
+    os.replace(path + ".part", path)
 
 
 def safe_name(s):
@@ -416,20 +439,45 @@ def _comparison_info(h):
 
 # --------------------------------------------------------------------------------------------- the network
 
-def fetch_dss(survey, ra, dec, size_arcmin, path=None):
+DSS_RETRY_WAIT = 10.0  # seconds before asking again after an error page (the archive answers so when busy)
+
+
+def dss_page(raw):
+    """the DSS archive's answer when it is not an image: ('none', text) for its page saying that the survey has no
+    plate here ('Calibration and image data not available for field', with an empty plate list), ('error', text)
+    for anything else (busy, out of memory or disk, maintenance, a bad request)"""
+    txt = raw.decode("latin-1", "replace")
+    plain = re.sub(r"\s+", " ", re.sub(r"<[^>]*>", " ", txt)).strip()
+    m = re.search(r"\n-{4}[ -]+\n(.*?)FATAL ERROR", txt, re.S)
+    if "Calibration and image data not available for field" in txt and m and not m.group(1).strip():
+        return "none", plain
+    return "error", plain
+
+
+def fetch_dss(survey, ra, dec, size_arcmin, path=None, tries=3):
+    """a DSS cutout (astropy HDU), or None where the survey has no plate; an error page from the archive is asked
+    again, and raises if it stays"""
     if survey not in SURVEYS:
         raise ValueError("unknown survey %r" % survey)
     size_arcmin = min(float(size_arcmin), 60.0)  # the DSS limit
     # position in decimal degrees, which avoids sexagesimal rounding
     q = urllib.parse.urlencode(dict(v=survey, r="%.6f" % (ra % 360.0), d="%.6f" % dec, e="J2000",
                                     h="%.2f" % size_arcmin, w="%.2f" % size_arcmin, f="fits", c="none"))
-    raw = http_get("https://archive.stsci.edu/cgi-bin/dss_search?" + q)
-    if not raw[:6] == b"SIMPLE":
-        return None
+    for k in range(tries):
+        raw = http_get("https://archive.stsci.edu/cgi-bin/dss_search?" + q)
+        if raw[:6] == b"SIMPLE":
+            break
+        kind, text = dss_page(raw)
+        if kind == "none":
+            return None
+        if k == tries - 1:
+            raise RuntimeError("DSS %s at %.5f %+.5f: the archive answered with an error page, not an image, %d times: %s"
+                               % (survey, ra, dec, tries, text[:300]))
+        time.sleep(DSS_RETRY_WAIT * (k + 1))
     from astropy.io import fits
     hdu = fits.open(io.BytesIO(raw))[0]
     if hdu.data is None or "CNPIX1" not in hdu.header or "AMDX1" not in hdu.header:
-        return None  # not a DSS plate cutout
+        raise RuntimeError("DSS %s at %.5f %+.5f: a FITS answer without an image or a plate solution" % (survey, ra, dec))
     if path:
         with open(path + ".part", "wb") as f:
             f.write(raw)
@@ -477,9 +525,10 @@ def parse_horizons_first(txt):
                 except ValueError:
                     return float("nan")
         return float("nan")
+    tm = re.search(r"Target body name:\s*(.*?)\s*\{source", txt)
     return dict(ra=num("R.A."), dec=num("DEC"), dra=num("dRA*cosD"), ddec=num("d(DEC)/dt"), V=num("APmag"),
                 ra3=num("RA_3sigma"), dec3=num("DEC_3sigma"), smaa=num("SMAA_3sig"), smia=num("SMIA_3sig"),
-                theta=num("Theta"))
+                theta=num("Theta"), target=tm.group(1).strip() if tm else "")
 
 
 def horizons_track(command, start, stop, step="5 d"):
@@ -490,12 +539,13 @@ def horizons_track(command, start, stop, step="5 d"):
     txt = http_get("https://ssd.jpl.nasa.gov/api/horizons.api?" + q).decode("utf-8", "replace")
     if "$$SOE" not in txt or "$$EOE" not in txt:
         raise RuntimeError("Horizons: no ephemeris\n" + txt[-800:])
+    tm = re.search(r"Target body name:\s*(.*?)\s*\{source", txt)
     rows = []
     for line in txt.split("$$SOE")[1].split("$$EOE")[0].strip().splitlines():
         p = [v.strip() for v in line.split(",")]
         t = dt.datetime.strptime(p[0][:17], "%Y-%b-%d %H:%M")
         rows.append(dict(t=t, ra=float(p[3]), dec=float(p[4]), V=float(p[5]), elong=float(p[7]),
-                         ra3=float(p[9]), dec3=float(p[10])))
+                         ra3=float(p[9]), dec3=float(p[10]), target=tm.group(1).strip() if tm else ""))
     return rows
 
 
@@ -537,61 +587,249 @@ def gaia_at_epoch(cat, year):
     return np.column_stack([ra, dec, g, has.astype(float)])
 
 
-def _sexa_dash(v, hours):
-    """hh-mm-ss.ss (RA) or dd-mm-ss.s with 'M' for minus (Dec), as sb_ident wants"""
-    neg = v < 0
-    x = abs(v) / 15.0 if hours else abs(v)
-    tot = int(round(x * 360000.0))  # hundredths of a second
-    a, rem = divmod(tot, 360000); b, c = divmod(rem, 6000)
-    s = "%02d-%02d-%05.2f" % (a, b, c / 100.0)
-    return ("M" + s) if (neg and not hours) else s
+SKYBOT_URL = "https://ssp.imcce.fr/webservices/skybot/api/conesearch.php"
+SKYBOT_RETRY_WAIT = 10.0  # seconds; SkyBoT now and then answers a good request with an error, and the same works later
 
 
-def known_objects(site, jd_ut, ra, dec, half_deg):
-    """JPL sb_ident (asteroids and comets) around ra, dec at jd_ut: list of (name, dRA", dDec", V) or raises"""
+def known_objects(site, jd_ut, ra, dec, radius_arcsec):
+    """SkyBoT (LTE, Paris Observatory; formerly IMCCE): the asteroids, comets and planets (dates 1889-2060) in a cone
+    around ra, dec at jd_ut, seen from the given observatory code. A list of dicts (num, name, label, xi and eta: the
+    offsets in arcsec east and north of ra, dec; V, err: position error in arcsec; cls; dra, ddec: motion in arcsec/h
+    east and north), or raises"""
+    rs = int(min(math.ceil(radius_arcsec), 36000))
+    q = urllib.parse.urlencode({"-ep": "%.6f" % jd_ut, "-ra": "%.6f" % (ra % 360.0), "-dec": "%.6f" % dec,
+                                "-rs": "%d" % rs, "-mime": "votable", "-output": "all", "-observer": site,
+                                "-filter": "0", "-objFilter": "111", "-from": "dss-precovery"})
+    for attempt in range(3):
+        try:
+            rows = parse_skybot(http_get(SKYBOT_URL + "?" + q), expect=(jd_ut, ra % 360.0, dec, rs))
+            break
+        except RuntimeError as e:
+            if attempt == 2:
+                raise RuntimeError("%s (3 tries)" % e)
+            time.sleep(SKYBOT_RETRY_WAIT * (attempt + 1))
     found = []
-    for kind in ("a", "c"):
-        q = urllib.parse.urlencode({"sb-kind": kind, "mpc-code": site, "obs-time": "%.6f" % jd_ut,
-                                    "fov-ra-center": _sexa_dash(ra % 360.0, True), "fov-dec-center": _sexa_dash(dec, False),
-                                    "fov-ra-hwidth": "%.4f" % half_deg, "fov-dec-hwidth": "%.4f" % half_deg,
-                                    "two-pass": "true", "suppress-first-pass": "true"})
-        js = json.loads(http_get("https://ssd-api.jpl.nasa.gov/sb_ident.api?" + q).decode())
-        for nm, kra, kdec, kv in parse_sb_ident(js):
-            xi, eta = tangent(np.array([kra]), np.array([kdec]), ra, dec)
-            found.append((nm, float(xi[0]), float(eta[0]), kv))
+    for k in rows:
+        xi, eta = tangent(np.array([k["ra"]]), np.array([k["dec"]]), ra, dec)
+        found.append(dict(k, xi=float(xi[0]), eta=float(eta[0])))
     return found
 
 
-def parse_sb_ident(js):
-    """rows of the second pass (or first, when only that exists); a missing count is an error, not 'none'"""
-    for data_k, field_k, n_k in (("data_second_pass", "fields_second", "n_second_pass"),
-                                 ("data_first_pass", "fields_first", "n_first_pass")):
-        if n_k in js:
-            n = int(js[n_k])
-            rows = js.get(data_k, []) or []
-            if n and len(rows) != n:
-                raise RuntimeError("sb_ident: %s=%d but %d rows" % (n_k, n, len(rows)))
-            fl = [str(f).lower() for f in js.get(field_k, [])]
+def _num(v):
+    try:
+        x = float(str(v).strip())
+        return x if math.isfinite(x) else float("nan")
+    except (TypeError, ValueError):
+        return float("nan")
 
-            def col(*keys):
-                for i, f in enumerate(fl):
-                    if all(k in f for k in keys):
-                        return i
-                return None
-            iN, iR, iD, iV = col("object"), col("astrometric", "ra"), col("astrometric", "dec"), col("magnitude")
-            if rows and (iN is None or iR is None or iD is None):
-                raise RuntimeError("sb_ident: unexpected columns %s" % js.get(field_k))
-            out = []
-            for r in rows:
-                try:
-                    v = float(str(r[iV]).strip()) if iV is not None else float("nan")
-                except ValueError:
-                    v = float("nan")
-                out.append((str(r[iN]), _parse_sexa(r[iR], True), _parse_sexa(r[iD], False), v))
-            return out
-    if "code" in js or "message" in js:
-        raise RuntimeError("sb_ident: %s" % js.get("message", js))
-    raise RuntimeError("sb_ident: no object count in the answer (keys %s)" % sorted(js)[:8])
+
+SKYBOT_NONE = "No solar system object was found"
+
+
+def parse_skybot(raw, expect=None):
+    """SkyBoT's cone-search answer as a VOTable (-mime=votable) -> list of dicts (num, name, label "num name", ra, dec,
+    V, err, cls, dra, ddec). SkyBoT's 'No solar system object was found' with an empty table is an empty list; any
+    other answer without rows, or one that echoes another epoch or cone than expect=(jd, ra, dec, radius), is an
+    error, never 'no objects'."""
+    import xml.etree.ElementTree as ET
+    data = raw if isinstance(raw, bytes) else str(raw).encode("utf-8")
+    try:
+        root = ET.fromstring(data)
+    except ET.ParseError:
+        raise RuntimeError("SkyBoT: not a VOTable: %r" % data.strip()[:200])
+
+    def tag(e):
+        return e.tag.rsplit("}", 1)[-1]
+
+    def kids(e, name):
+        return [k for k in e if tag(k) == name]
+
+    def status(e):
+        for k in kids(e, "INFO"):
+            if k.get("name") == "QUERY_STATUS":
+                return k.get("value", ""), (k.text or "").strip()
+        return None, ""
+    if tag(root) != "VOTABLE":
+        raise RuntimeError("SkyBoT: not a VOTable: %r" % data.strip()[:200])
+    st, msg = status(root)
+    if st != "OK":
+        raise RuntimeError("SkyBoT: query status %s %s" % (st, msg[:200]))
+    if expect is not None:  # the answer must be for the epoch and cone asked
+        info = {k.get("ID"): k.get("value", "") for k in kids(root, "INFO")}
+        m = re.match(r"^\s*([0-9.]+)\s*([+-][0-9.]+)\s*,\s*rs=([0-9.]+)\s*$", info.get("reqTarget", ""))
+        ep = _num(info.get("reqEpoch"))
+        if not (m and abs(ep - expect[0]) < 1e-5 and abs(float(m.group(1)) - expect[1]) < 1e-5
+                and abs(float(m.group(2)) - expect[2]) < 1e-5 and abs(float(m.group(3)) - expect[3]) < 0.5):
+            raise RuntimeError("SkyBoT: the answer is for epoch %r, cone %r, not the one asked (%s)"
+                               % (info.get("reqEpoch"), info.get("reqTarget"), expect))
+    res = kids(root, "RESOURCE")
+    tabs = kids(res[0], "TABLE") if len(res) == 1 else []
+    if len(tabs) != 1:
+        raise RuntimeError("SkyBoT: expected one table, got %d resources and %d tables" % (len(res), len(tabs)))
+    t = tabs[0]
+    datas = kids(t, "DATA")
+    if len(datas) != 1 or len(kids(datas[0], "TABLEDATA")) != 1 or len(datas[0]) != 1:
+        raise RuntimeError("SkyBoT: the table has no TABLEDATA part")
+    trs = kids(kids(datas[0], "TABLEDATA")[0], "TR")
+    if t.get("nrows") is None or int(t.get("nrows")) != len(trs):
+        raise RuntimeError("SkyBoT: nrows=%s but %d rows" % (t.get("nrows"), len(trs)))
+    rst, rmsg = status(res[0])
+    if rst == "ERROR" and rmsg.startswith(SKYBOT_NONE) and not trs:
+        return []
+    if rst not in (None, "OK"):
+        raise RuntimeError("SkyBoT: %s %s" % (rst, rmsg[:200]))
+    if not trs:
+        raise RuntimeError("SkyBoT: no rows, and not SkyBoT's 'nothing found' answer")
+    fields = [f.get("ID") or f.get("name") or "" for f in kids(t, "FIELD")]
+    col = {f.lower(): i for i, f in enumerate(fields)}
+    miss = [k for k in ("num", "name", "ra", "de", "class", "magv", "errpos", "dracosdec", "ddec") if k not in col]
+    if miss:
+        raise RuntimeError("SkyBoT: no %s column (columns %s)" % (", ".join(miss), fields))
+    out = []
+    for tr in trs:
+        v = [(td.text or "").strip() for td in kids(tr, "TD")]
+        if len(v) != len(fields):
+            raise RuntimeError("SkyBoT: a row with %d values for %d columns" % (len(v), len(fields)))
+        get = lambda k: v[col[k]] if k in col else ""  # noqa: E731
+        num = "" if get("num").lower() in ("", "-", "none", "null", "nan") else get("num")
+        name = get("name")
+        label = (num + " " + name).strip() if name != num else num
+        kra, kdec = _parse_sexa(get("ra"), True), _parse_sexa(get("de"), False)
+        if not label or not (np.isfinite(kra) and np.isfinite(kdec)):
+            raise RuntimeError("SkyBoT: unreadable row (name %r, RA %r, Dec %r)" % (label, get("ra"), get("de")))
+        out.append(dict(num=num, name=name, label=label, ra=kra, dec=kdec, V=_num(get("magv")), err=_num(get("errpos")),
+                        cls=get("class"), dra=_num(get("dracosdec")), ddec=_num(get("ddec"))))
+    return out
+
+
+_DESIG = re.compile(r"^(?:(1[89]\d\d|20\d\d) ?([A-Z]{2}\d*)|(\d{4}) (P-L|T-[123]))$", re.I)
+
+
+def _desig(s):
+    """'2026 ED138', '2026ed138', '2040 P-L', '1125 t-2' -> the designation as printed ('2026 ED138'); else None"""
+    m = _DESIG.match(re.sub(r"\s+", " ", str(s)).strip())
+    if not m:
+        return None
+    return ("%s %s" % (m.group(1), m.group(2)) if m.group(1) else "%s %s" % (m.group(3), m.group(4))).upper()
+
+
+def _norm_name(s):
+    s = re.sub(r"\s+", " ", str(s)).strip()
+    return (_desig(s) or s).lower()
+
+
+def name_keys(names):
+    """(numbers, names) that identify an object, from strings such as '50000', 'Quaoar', '2002 LM60',
+    '(50000) Quaoar' or Horizons' '50000 Quaoar (2002 LM60)'; a designation such as '2026 ED138' is a name, not
+    number 2026"""
+    nums, nams = set(), set()
+    for s in names:
+        s = re.sub(r"\s+", " ", str(s or "")).strip()
+        for part in re.findall(r"\(([^)]*)\)", s):
+            part = part.strip()
+            (nums if part.isdigit() else nams).add(str(int(part)) if part.isdigit() else _norm_name(part))
+        rest = re.sub(r"\([^)]*\)", " ", s).strip()
+        rest = re.sub(r"\s+", " ", rest)
+        if not rest:
+            continue
+        m = re.match(r"^(\d+)(?: (.+))?$", rest)
+        if _desig(rest) or not m:
+            nams.add(_norm_name(rest))
+        else:
+            nums.add(str(int(m.group(1))))
+            if m.group(2):
+                nams.add(_norm_name(m.group(2)))
+    nams.discard("")
+    return nums, nams
+
+
+def _is_target(k, keys):
+    """by number, or by name or designation. SkyBoT also lists some objects as comets, with the comet's name in the
+    number column: (60558) Echeclus comes back as '60558 | Echeclus' and as 'P/Echeclus | 174P'; both are the target."""
+    nums, nams = keys
+    num, nm = str(k.get("num", "") or ""), str(k.get("name", "") or "")
+    if num.isdigit() and num.lstrip("0") in nums:
+        return True
+    return any(_norm_name(re.sub(r"^\d*[PCDXI]/", "", x)) in nams for x in (nm, num) if x)
+
+
+def _is_comet(k):
+    return "comet" in str(k.get("cls", "")).lower() or bool(re.match(r"^(\d+[PCDXI]\b|[PCDXI]/)", str(k.get("name", ""))))
+
+
+def _trail_distance(x, y, k, exp_min):
+    """distance (arcsec) from x, y to the object's path during the exposure (to its mid-exposure place if no motion)"""
+    h = exp_min / 120.0  # half the exposure in hours
+    vx, vy = k.get("dra", float("nan")), k.get("ddec", float("nan"))
+    if not (np.isfinite(vx) and np.isfinite(vy)) or h <= 0:
+        return math.hypot(x - k["xi"], y - k["eta"])
+    ax, ay = k["xi"] - vx * h, k["eta"] - vy * h
+    bx, by = k["xi"] + vx * h, k["eta"] + vy * h
+    dx, dy = bx - ax, by - ay
+    L2 = dx * dx + dy * dy
+    u = 0.0 if L2 == 0 else min(1.0, max(0.0, ((x - ax) * dx + (y - ay) * dy) / L2))
+    return math.hypot(x - ax - u * dx, y - ay - u * dy)
+
+
+KNOWN_MIN_RADIUS = 10.0    # arcsec: a source this close to a well-placed known object's path is that object
+KNOWN_SHARP_ERR = 5.0      # arcsec: objects placed better than this (3 sigma 15") reject sources outright
+KNOWN_MAX_ERR = 200.0      # arcsec: objects placed worse than this could be anywhere and are only listed
+KNOWN_FAINT_MARGIN = 2.0   # mag: an asteroid predicted fainter than the source by more than this is not the source
+KNOWN_CONE_MARGIN = 3.0 * KNOWN_MAX_ERR  # arcsec added to the box's half-diagonal for the SkyBoT cone
+
+
+def known_object_verdicts(cands, known, keys, exp_min, pred_V=float("nan"), pred_cov=None):
+    """the known objects from known_objects() against the sources in the box.
+    - The target is the entry whose number, or name or designation, is in keys (from name_keys). If none is, an
+      object whose place and brightness fit the prediction (within 3 sigma of it, its own error, at least 10"/3, added
+      to the prediction's covariance pred_cov; V within 2 mag of pred_V) may be the target under another name: it
+      rejects nothing ('possible').
+    - Each source is compared with each other object's path during the exposure. An asteroid placed to 5" or better
+      (or with no error given) rejects the sources within max(10", 3 x error) of its path, except that one predicted
+      more than 2 mag fainter than the source only adds a note. An asteroid placed to between 5" and 200" rejects
+      nothing; the sources within 3 x error that are not much brighter than it get a note and 'known_uncertain'.
+      Asteroids placed worse than 200" are only listed. A comet (its place and magnitude this far back are not
+      trusted) rejects nothing and marks the sources within max(60", 3 x error).
+    Returns (others, target, possible) as dicts for the results."""
+    others, target, possible = [], [], []
+    for k in known:
+        (target if _is_target(k, keys) else others).append(k)
+    if not target:
+        for k in list(others):
+            if np.isfinite(k["err"]) and k["err"] > KNOWN_MAX_ERR:
+                continue
+            s_ = max(KNOWN_MIN_RADIUS / 3.0, k["err"] if np.isfinite(k["err"]) else 0.0)
+            C = (np.zeros((2, 2)) if pred_cov is None else np.asarray(pred_cov, float)) + np.diag([s_ * s_, s_ * s_])
+            x = np.array([k["xi"], k["eta"]])
+            vfit = not (np.isfinite(k["V"]) and np.isfinite(pred_V)) or abs(k["V"] - pred_V) <= KNOWN_FAINT_MARGIN
+            if float(x @ np.linalg.solve(C, x)) <= 9.0 and vfit:
+                others.remove(k); possible.append(k)
+    for c in cands:
+        m = c.get("mag_g_scale", float("nan"))
+        for k in others:
+            d = _trail_distance(c["dra_arcsec"], c["ddec_arcsec"], k, exp_min)
+            comet = _is_comet(k)
+            vtxt = ("V %.1f" % k["V"]) if np.isfinite(k["V"]) else "V unknown"
+            faint = (not comet) and np.isfinite(k["V"]) and np.isfinite(m) and k["V"] > m + KNOWN_FAINT_MARGIN
+            e = k["err"]
+            if not comet and (not np.isfinite(e) or e <= KNOWN_SHARP_ERR):
+                if d > max(KNOWN_MIN_RADIUS, 3.0 * e if np.isfinite(e) else 0.0):
+                    continue
+                if faint:
+                    c["note"] = (c["note"] + "; " if c["note"] else "") + \
+                        "known object %s %.1f\" away is predicted at %s, too faint to be this source" % (k["label"], d, vtxt)
+                else:
+                    c["rejected"] = (c["rejected"] + "; " if c["rejected"] else "") + "known object " + k["label"]
+            elif not (np.isfinite(e) and e > KNOWN_MAX_ERR):  # a comet's place this far back is never trusted
+                r = max(3.0 * e, 60.0 if comet else 0.0) if np.isfinite(e) else 60.0
+                if d <= r and not faint:
+                    c.setdefault("known_uncertain", []).append(k["label"])
+                    c["note"] = (c["note"] + "; " if c["note"] else "") + "could be known object %s (%s; its place is " \
+                        "uncertain by %s)" % (k["label"], vtxt, ("%.0f\"" % e) if np.isfinite(e) else "an unknown amount")
+    rec = lambda k: dict(name=k["label"], dra_arcsec=round(k["xi"], 2), ddec_arcsec=round(k["eta"], 2), V=k["V"],  # noqa: E731
+                         err_arcsec=k["err"], cls=k.get("cls", ""), rate_arcsec_h=[k.get("dra"), k.get("ddec")])
+    return [rec(k) for k in others], [rec(k) for k in target], [rec(k) for k in possible]
+
 
 # --------------------------------------------------------------------------------------- image measurement
 
@@ -939,6 +1177,14 @@ class PlanIncomplete(RuntimeError):
     """some archive queries failed, so the list of plates would be incomplete"""
 
 
+class FetchIncomplete(PlanIncomplete):
+    """some downloads failed, so a plate could be measured without all of its other-date plates"""
+
+
+class SubjectMismatch(ValueError):
+    """the subject's names are not names of the object that JPL Horizons found"""
+
+
 def read_plan(out):
     """plan.json, refused when the last planning run of this subject stopped incomplete"""
     st = os.path.join(out, "plan_status.txt")
@@ -976,11 +1222,42 @@ def cutout_covers(path, ra, dec, half_arcsec):
     return box_on_cutout(h, ra, dec, half_arcsec)
 
 
+def _incomplete(status, msg):
+    log("PLAN INCOMPLETE: " + msg)
+    with open(status, "w") as f:
+        f.write("INCOMPLETE %sZ  %s\n" % (dt.datetime.now(dt.timezone.utc).isoformat()[:19], msg))
+    raise PlanIncomplete(msg)
+
+
+def check_target_names(cfg, target):
+    """the subject's names must all be names of the object JPL Horizons found (target: its 'Target body name'), so that
+    the known-object check sets aside that object and no other"""
+    if not target:
+        return
+    hn, hm = name_keys([target])
+    bad = [n for n in cfg.get("names", [cfg["designation"]]) if not (name_keys([n])[0] <= hn and name_keys([n])[1] <= hm)]
+    if bad:
+        raise SubjectMismatch("JPL Horizons found %s for %r, but the subject's names %s are not names of that object; "
+                              "check the Horizons command and the names" % (target, cfg["horizons_command"], bad))
+
+
 def step_plan(cfg, out):
     cmd = cfg["horizons_command"]
     y0, y1 = cfg["years"]
+    status = os.path.join(out, "plan_status.txt")
     log("Track %s %d-%d ..." % (cfg["designation"], y0, y1))
-    track = horizons_track(cmd, "%d-01-01" % y0, "%d-01-01" % (y1 + 1), "5 d")
+    try:
+        track = horizons_track(cmd, "%d-01-01" % y0, "%d-01-01" % (y1 + 1), "5 d")
+    except Exception as ex:  # noqa
+        _incomplete(status, "JPL Horizons failed (%s). Nothing was planned; run this subject again later." % str(ex)[:300])
+    if track:
+        log("  JPL Horizons: %s" % (track[0].get("target") or "(no target name given)"))
+        try:
+            check_target_names(cfg, track[0].get("target", ""))
+        except SubjectMismatch as ex:
+            with open(status, "w") as f:  # an earlier plan of this subject is not to be used either
+                f.write("INCOMPLETE %sZ  %s\n" % (dt.datetime.now(dt.timezone.utc).isoformat()[:19], ex))
+            raise
     track = [r for r in track if r["elong"] > cfg.get("min_elongation", 60)]  # night-time plates, twilight included
     step_deg = cfg.get("sample_deg", 1.0)  # DSS plate cells are ~5-6 deg, so 1 deg sampling finds them all
     windows = cfg.get("survey_years", {})
@@ -1028,7 +1305,6 @@ def step_plan(cfg, out):
             elif sv != plates[key]["survey"] and sv not in plates[key]["also_in"]:
                 plates[key]["also_in"].append(sv)
             time.sleep(0.3)
-    status = os.path.join(out, "plan_status.txt")
     if failed:
         # a plate missed here would silently read as "not on any plate": stop instead, and write nothing
         msg = ("%d of %d archive queries failed (errors on the archive's side, e.g. HTTP 500), so the list of plates "
@@ -1042,8 +1318,12 @@ def step_plan(cfg, out):
     cache = {}
     for key, pl in sorted(plates.items()):
         mid = dt.datetime.fromisoformat(pl["mid"])
-        e = horizons_at(cmd, pl["site"], jd_from_datetime(mid), cache)
-        hdu = fetch_dss(pl["survey"], e["ra"], e["dec"], 1.0)
+        try:
+            e = horizons_at(cmd, pl["site"], jd_from_datetime(mid), cache)
+            hdu = fetch_dss(pl["survey"], e["ra"], e["dec"], 1.0)
+        except Exception as ex:  # noqa
+            _incomplete(status, "the archive query for plate %s at the object's position failed (%s), so whether the "
+                        "object is on it is unknown. Nothing was planned; run this subject again later." % (key, str(ex)[:300]))
         same = False
         if hdu is not None:
             try:
@@ -1052,7 +1332,7 @@ def step_plan(cfg, out):
                 same = False
         pl.update(pred_ra=e["ra"], pred_dec=e["dec"], V=e["V"], ra3=e["ra3"], dec3=e["dec3"], smaa=e["smaa"],
                   smia=e["smia"], theta=e["theta"], rate=math.hypot(e["dra"], e["ddec"]), dra_rate=e["dra"],
-                  ddec_rate=e["ddec"], on_plate=same)
+                  ddec_rate=e["ddec"], on_plate=same, target_name=e.get("target", ""))
         log("  %-18s mid %s  pred %.5f %+.5f  V %.2f  3sig ellipse %5.1f\" x %4.1f\" at %+5.1f deg  %s%s" % (
             key, pl["mid"][:16], e["ra"], e["dec"], e["V"], e["smaa"], e["smia"], e["theta"],
             "ON PLATE" if same else "-", "" if pl["reportable"] else "  (not reportable: %s)" % (pl["flag"] or pl["time_note"])))
@@ -1063,6 +1343,8 @@ def step_plan(cfg, out):
         json.dump(plates, f, indent=1)
     with open(os.path.join(out, "plan.json"), "w") as f:
         json.dump(keep, f, indent=1)
+    with open(os.path.join(out, "fetch_status.txt"), "w") as f:  # a new plan needs a new fetch before measuring
+        f.write("INCOMPLETE %sZ  new plan, not fetched yet\n" % dt.datetime.now(dt.timezone.utc).isoformat()[:19])
     unread = sorted(p_ for p_, w_ in refused.items() if not w_.startswith("used only"))
     with open(status, "w") as f:
         f.write("COMPLETE %sZ  %d archive queries, none failed%s\n" % (
@@ -1075,6 +1357,10 @@ def step_plan(cfg, out):
 
 def step_fetch(cfg, out):
     plan = read_plan(out)
+    failed = []
+    status = os.path.join(out, "fetch_status.txt")
+    with open(status, "w") as f:  # until the end says otherwise: an interrupted fetch must not be measured
+        f.write("INCOMPLETE %sZ  fetch started, not finished\n" % dt.datetime.now(dt.timezone.utc).isoformat()[:19])
     for pl in plan:
         tag = "%s_%s" % (pl["survey"], pl["plate"])
         half = max(search_half_box(cfg, pl))
@@ -1086,10 +1372,16 @@ def step_fetch(cfg, out):
             continue
         tgt = os.path.join(out, "cutouts", tag + "__target.fits")
         if not cutout_covers(tgt, pl["pred_ra"], pl["pred_dec"], half):
-            hdu = fetch_dss(pl["survey"], pl["pred_ra"], pl["pred_dec"], size)
-            if hdu is None:
+            try:
+                hdu = fetch_dss(pl["survey"], pl["pred_ra"], pl["pred_dec"], size)
+            except Exception as e:  # noqa
+                failed.append("%s: %s" % (tag, str(e)[:200])); log("  %s: download failed: %s" % (tag, e)); continue
+            if hdu is None:  # this plate is then not measured (the measuring step says so)
                 log("  %s: no cutout returned" % tag); continue
-            got = plate_info(hdu.header)["plate"]
+            try:
+                got = plate_info(hdu.header)["plate"]
+            except ValueError as e:
+                log("  %s: the cutout's header can't be read (%s); skipped" % (tag, e)); continue
             if got != pl["plate"]:
                 log("  %s: the archive returned plate %s at this position, not %s; skipped" % (tag, got, pl["plate"]))
                 continue
@@ -1098,7 +1390,11 @@ def step_fetch(cfg, out):
             cp = os.path.join(out, "cutouts", tag + "__cmp_" + sv + ".fits")
             if cutout_covers(cp, pl["pred_ra"], pl["pred_dec"], half):
                 continue
-            hdu = fetch_dss(sv, pl["pred_ra"], pl["pred_dec"], size)
+            try:
+                hdu = fetch_dss(sv, pl["pred_ra"], pl["pred_dec"], size)
+            except Exception as e:  # noqa
+                failed.append("%s comparison %s: %s" % (tag, sv, str(e)[:200]))
+                log("  %s comparison %s: download failed: %s" % (tag, sv, e)); continue
             if hdu is None:
                 continue
             try:
@@ -1110,6 +1406,17 @@ def step_fetch(cfg, out):
             hdu.writeto(cp + ".part", overwrite=True, output_verify="silentfix"); os.replace(cp + ".part", cp)
             time.sleep(0.3)
         log("  fetched %s (%.1f')" % (tag, size))
+    now = dt.datetime.now(dt.timezone.utc).isoformat()[:19]
+    if failed:
+        # a missing other-date plate could let a fixed source pass as the object: no measuring until all are in
+        msg = ("%d downloads failed (%s). The cutouts already downloaded are kept; run --fetch again later, then "
+               "--measure." % (len(failed), "; ".join(failed)[:600]))
+        with open(status, "w") as f:
+            f.write("INCOMPLETE %sZ  %s\n" % (now, msg))
+        log("FETCH INCOMPLETE: " + msg)
+        raise FetchIncomplete(msg)
+    with open(status, "w") as f:
+        f.write("COMPLETE %sZ\n" % now)
 
 
 def ellipse_cov(pl):
@@ -1361,25 +1668,26 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
         if not any(t[2] == "absent" for t in c["static_test"]):
             notes.append("not shown absent on any other-date plate")
         c["note"] = "; ".join(notes)
-    # known asteroids and comets at that moment (JPL sb_ident), other than the target itself
+    # known asteroids and comets at that moment (SkyBoT), other than the target itself; the cone holds the whole box
+    # plus 600", so every object whose place is known to 200" or better (3 sigma 600") and could reach into the box is in it
     known_checked = False
     if cfg.get("check_known", True) and (known_fn is not None or gaia_fn is gaia_cone):
         kfn = known_fn or known_objects
         try:
-            kn = kfn(info["site"], jd_from_datetime(info["mid"]), ra0, dec0, max(bx, by) / 3600.0 + 0.02)
-            # a name counts only as a whole word or number ("50000" must not match "150000")
-            names = [re.compile(r"(?<![0-9a-z])%s(?![0-9a-z])" % re.escape(n.lower()))
-                     for n in cfg.get("names", [cfg["designation"]])]
-            others = []
-            for nm, kra, kdec, kv in kn:
-                if any(t.search(nm.lower()) for t in names):
-                    continue
-                others.append((nm, kra, kdec, kv))
-            res["known_objects_in_box"] = [o[0] for o in others]
-            for c in cands:
-                for nm, kra, kdec, kv in others:
-                    if np.isfinite(kra) and math.hypot(c["dra_arcsec"] - kra, c["ddec_arcsec"] - kdec) < 10.0:
-                        c["rejected"] = (c["rejected"] + "; " if c["rejected"] else "") + "known object " + nm
+            kn = kfn(info["site"], jd_from_datetime(info["mid"]), ra0, dec0, math.hypot(bx, by) + KNOWN_CONE_MARGIN)
+            keys = name_keys(list(cfg.get("names", [cfg["designation"]])) + [pl.get("target_name", "")])
+            pv = pl.get("V")
+            others, target, possible = known_object_verdicts(cands, kn, keys, info["exp_min"],
+                                                             pv if isinstance(pv, (int, float)) else float("nan"), cov_o)
+            res["known_objects_in_box"] = [o["name"] for o in others if abs(o["dra_arcsec"]) <= bx and abs(o["ddec_arcsec"]) <= by]
+            res["known_objects"] = others
+            res["skybot_target"] = target or "the target is not in SkyBoT's list"
+            if possible:
+                res["known_possible_target"] = possible
+                res["flag"] = (res["flag"] + "; " if res["flag"] else "") + \
+                    "the target is not in SkyBoT's list under its names, but %s fits the prediction; it may be the target " \
+                    "under another name (check by hand)" % ", ".join(o["name"] for o in possible)
+                res["reportable"] = False
             known_checked = True
         except Exception as e:  # noqa
             res["known_objects_in_box"] = "check failed: %s" % str(e)[:200]
@@ -1393,6 +1701,12 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
             c[kk] = round(float(c[kk]), 3)
     good = sorted([c for c in cands if not c["rejected"]], key=lambda c: c["dist_sigma"])
     inside = [c for c in good if c["dist_sigma"] <= 3.0]
+    # a known object rejected inside the prediction's 3-sigma region: the target could be among them
+    kin = [c for c in cands if "known object" in c["rejected"] and c["dist_sigma"] <= 3.0]
+    if kin:
+        res["flag"] = (res["flag"] + "; " if res["flag"] else "") + "a source within 3 sigma of the prediction was " \
+            "rejected as a known object (%s); check by hand" % "; ".join(c["rejected"] for c in kin)
+        res["reportable"] = False
     res["n_in_box"] = len(cands); res["n_candidates"] = len(good); res["n_within_3sigma"] = len(inside)
     res["rate_arcsec_h"] = round(pl.get("rate", float("nan")), 3)
     res["half_exposure_shift_arcsec"] = round(pl.get("rate", 0.0) * info["exp_min"] / 120.0, 2)
@@ -1408,10 +1722,16 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
                    best_mag=b["mag_g_scale"], best_snr=b["snr"], best_sig_ra=b["sig_ra_arcsec"],
                    best_sig_dec=b["sig_dec_arcsec"], best_dist_sigma=b["dist_sigma"], best_note=b["note"])
         res["result"] = "unique candidate within 3 sigma"
+        if b.get("known_uncertain"):
+            res["flag"] = (res["flag"] + "; " if res["flag"] else "") + \
+                "the candidate could be known object %s, whose place is uncertain; check by hand" % ", ".join(b["known_uncertain"])
+            res["reportable"] = False
     elif len(inside) > 1:
         res["result"] = "ambiguous: %d candidates within 3 sigma" % len(inside)
     else:
         res["result"] = "no candidate within 3 sigma"
+    if len(inside) != 1:
+        res["reportable"] = False  # nothing to report
     res["status"] = "ok"
     if show:
         make_picture(out, tag, img, h, fit, pl, cands, bx, by)
@@ -1460,6 +1780,10 @@ def make_picture(out, tag, img, h, fit, pl, cands, bx, by):
 
 def step_measure(cfg, out):
     plan = read_plan(out)
+    st = os.path.join(out, "fetch_status.txt")  # (folders from version 1.0.0 have none)
+    if os.path.exists(st) and not open(st).read().startswith("COMPLETE"):
+        raise FetchIncomplete("the last --fetch of this subject did not finish, or the plan is newer (%s); run --fetch "
+                              "first" % st)
     rows = []; allc = {}
     for pl in plan:
         try:
@@ -1473,8 +1797,7 @@ def step_measure(cfg, out):
             (" -> %+.2f\" %+.2f\" (+-%.2f\", %.2f\") mag %.1f, %.1f sigma" % (
                 r["best_dra"], r["best_ddec"], r["best_sig_ra"], r["best_sig_dec"], r["best_mag"], r["best_dist_sigma"]))
             if "best_dra" in r else ""))
-    with open(os.path.join(out, "results.json"), "w") as f:
-        json.dump(dict(version=VERSION, subject=cfg["designation"], plates=rows, candidates=allc), f, indent=1, default=str)
+    write_json(os.path.join(out, "results.json"), dict(version=VERSION, subject=cfg["designation"], plates=rows, candidates=allc))
     keys = ["plate", "mid", "exp_min", "site", "mpc", "V", "pred_ra", "pred_dec", "ra3", "dec3", "smaa", "smia", "theta",
             "n_ref", "rms_arcsec", "n_in_box", "n_candidates", "n_within_3sigma", "result", "best_ra", "best_dec",
             "best_dra", "best_ddec", "best_sig_ra", "best_sig_dec", "best_dist_sigma", "best_mag", "best_snr",
@@ -1492,8 +1815,9 @@ def self_test():
     """synthetic plates in a real DSS header layout, with DSS-like correlated noise. Covers real POSS-I and UK Schmidt
     header formats; Hill's date and clock tables; a same-night partner plate; a faint static source; a Gaia star
     without proper motion; a neighbor on the other-date plate; a long tilted error ellipse with an impostor near the
-    center; a known asteroid; the sb_ident answer format; missing uncertainties; header errors; blended neighbors;
-    archive errors while planning; and the stated error bars against the real scatter."""
+    center; a known asteroid; SkyBoT's answer format and the known-object rules; the JSON writer; --object; missing
+    uncertainties; header errors; blended neighbors; archive errors while planning; and the stated error bars against
+    the real scatter."""
     import tempfile
     from astropy.io import fits
     rng = np.random.default_rng(7)
@@ -1646,22 +1970,300 @@ def self_test():
     check("implausible" in bad_date["flag"] and "implausible" not in good_date["flag"],
           "a 1952 date on a POSS-II IIIaF plate is flagged; 1991 is not (%s)" % bad_date["flag"])
     load_poss1_dates(os.path.join(tmp, "none.csv"))  # an empty table for the rest of the test
-    # ---------------- 2. the sb_ident answer format (field names from JPL's documentation)
-    js = {"n_second_pass": 1, "fields_second": ["Object name", "Astrometric RA (hh:mm:ss)", "Astrometric Dec (dd mm'ss\")",
-          "Dist. from center RA (\")", "Dist. from center Dec (\")", "Dist. from center Norm (\")", "Visual magnitude (V)",
-          "RA rate (deg/s)", "Dec rate (deg/s)"],
-          "data_second_pass": [["12345 Test (1990 AB)", "11:19:24.12", "-10 57'00.0\"", "+5.0", "-3.0", "5.8", "18.5",
-                                "1e-6", "1e-6"]]}
-    rows = parse_sb_ident(js)
-    check(len(rows) == 1 and abs(rows[0][1] - 169.8505) < 1e-4 and abs(rows[0][2] + 10.95) < 1e-4,
-          "sb_ident second-pass rows read (%s)" % (rows[:1],))
+    # ---------------- 2. SkyBoT's answer and the known-object rules
+    # SkyBoT's real answers (VOTable), cut to the columns used here: a cone of 300" around RA 190.35549, Dec -3.96212 at
+    # JD 2434887.688819 from Palomar (POSS-I plate XE675, Quaoar); and a field with nothing in it (RA 10, Dec +85)
+    vo_head = ('<?xml version="1.0" encoding="UTF-8" ?>\n<vot:VOTABLE version="1.3" xsi:schemaLocation="http://www.ivoa.net/'
+               'xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/VOTable-1.3.xsd" xmlns:xsi="http://www.w3.org/2001/'
+               'XMLSchema-instance" xmlns:vot="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC">\n'
+               '<vot:INFO ID="status" name="QUERY_STATUS" value="OK"/>\n<vot:INFO ID="ticket" name="Ticket" value="%s"/>\n'
+               '<vot:INFO ID="reqTarget" name="-c" value="%s"/>\n<vot:INFO ID="reqEpoch" name="Epoch" value="%s"/>\n'
+               '<vot:INFO ID="supplier" name="Supplier" value="Provided by LTE/OBSPM/CNRS"/>\n<vot:RESOURCE name="Skybot.ConeSearch">'
+               '<vot:DESCRIPTION>SkyBoT - List of the targets located in the FOV</vot:DESCRIPTION>\n')
+    vo_fields = ('<vot:FIELD ID="num" name="Num" datatype="char" arraysize="6"/>\n'
+                 '<vot:FIELD ID="name" name="Name" datatype="char" arraysize="32"/>\n'
+                 '<vot:FIELD ID="ra" name="RA" ref="Ephemeris" datatype="char" arraysize="13" unit="h:m:s"/>\n'
+                 '<vot:FIELD ID="de" name="DEC" ref="Ephemeris" datatype="char" arraysize="13" unit="d:m:s"/>\n'
+                 '<vot:FIELD ID="class" name="Class" datatype="char" arraysize="24"/>\n'
+                 '<vot:FIELD ID="magV" name="Mv" datatype="float" width="13" precision="2"/>\n'
+                 '<vot:FIELD ID="errpos" name="ErrPos" datatype="float" width="10" precision="3" unit="arcsec"/>\n'
+                 '<vot:FIELD ID="angdist" name="d" datatype="float" width="8" precision="3" unit="arcsec"/>\n'
+                 '<vot:FIELD ID="dracosdec" name="dRAcosDec" datatype="double" width="12" unit="arcsec/h"/>\n'
+                 '<vot:FIELD ID="ddec" name="dDEC" datatype="double" width="12" unit="arcsec/h"/>\n')
+    vo_rows = [("50000", "Quaoar", "12 41 25.2785", "-03 57 43.369", "KBO&gt;Classical&gt;Main", "19.04", "3.637", "0.642",
+                "-1.4334", "0.643"),
+               ("409671", "2005 YY236", "12 41 23.4548", "-03 57 41.769", "MB&gt;Outer", "21.51", "0.427", "27.938", "-0.0715",
+                "0.977"),
+               ("-", "2008 UX294", "12 41 31.4411", "-03 53 35.424", "MB&gt;Middle", "22.57", "13.986", "264.584", "-8.5744",
+                "-2.665")]
+    q_cone, q_ep = "190.35548999999997-3.9621200000000001,rs=300", "2434887.688819"
+
+    def votable(rows, nrows=None, res_info='<vot:INFO name="QUERY_STATUS" value="OK"/>\n', fields=None, data=None, cone=q_cone,
+                ep=q_ep):
+        tr = "".join("<vot:TR>%s</vot:TR>\n" % "".join("<vot:TD>%s</vot:TD>" % x for x in r) for r in rows)
+        nr = "" if nrows == "absent" else ' nrows="%d"' % (len(rows) if nrows is None else nrows)
+        return (vo_head % ("188053159621697502", cone, ep) + res_info +
+                '<vot:TABLE ID="SkybotConeSearch_results" name="SkybotConeSearch"%s>\n' % nr + (fields or vo_fields)
+                + (data or "<vot:DATA><vot:TABLEDATA>\n" + tr + "</vot:TABLEDATA>\n</vot:DATA>\n") + "</vot:TABLE>\n"
+                "</vot:RESOURCE>\n</vot:VOTABLE>\n").encode()
+    sky_ans = votable(vo_rows)
+    sky_none = (vo_head % ("188053157801019808", "10+85,rs=120", q_ep) + '<vot:INFO name="QUERY_STATUS" value="ERROR">No '
+                'solar system object was found in the requested FOV: RA(deg,hms) DEC(deg,dms): 10 (00:40:00.00) 85 '
+                '(+85:00:00.00) EPOCH: 1954-05-25 04:31:53.96</vot:INFO>\n<vot:TABLE ID="SkybotConeSearch_results" '
+                'name="SkybotConeSearch" nrows="0"><vot:DATA><vot:TABLEDATA></vot:TABLEDATA>\n</vot:DATA>\n</vot:TABLE>\n'
+                '</vot:RESOURCE>\n</vot:VOTABLE>\n').encode()
+    urls = []
+    g = globals(); saved = g["http_get"]
     try:
-        parse_sb_ident({"signature": {}})
-        check(False, "an sb_ident answer without a count is an error, not 'none'")
-    except RuntimeError:
-        check(True, "an sb_ident answer without a count is an error, not 'none'")
-    check(_sexa_dash(169.85, True) == "11-19-24.00" and _sexa_dash(-10.95, False) == "M10-57-00.00",
-          "sb_ident coordinates as hh-mm-ss / Mdd-mm-ss (%s %s)" % (_sexa_dash(169.85, True), _sexa_dash(-10.95, False)))
+        g["http_get"] = lambda url, **k_: (urls.append(url), sky_ans)[1]
+        kn = known_objects("675", 2434887.688819, 190.35549, -3.96212, 300.0)
+    finally:
+        g["http_get"] = saved
+    sky_err = (vo_head % ("1", q_cone, q_ep)).replace(  # the error SkyBoT gave once for a 1994 plate (the same query worked later)
+        '<vot:INFO ID="status" name="QUERY_STATUS" value="OK"/>', '<vot:INFO ID="status" name="QUERY_STATUS" value="ERROR">'
+        'SkyBoT comet conesearch -&gt; Bad request: Epoch 2434887.688819 not available...</vot:INFO>', 1).encode() + \
+        b"</vot:RESOURCE></vot:VOTABLE>"
+    seq = [sky_err, sky_ans]; n_sky = []; wait0 = g["SKYBOT_RETRY_WAIT"]
+    try:
+        g["SKYBOT_RETRY_WAIT"] = 0.0
+        g["http_get"] = lambda url, **k_: (n_sky.append(1), seq[min(len(n_sky), 2) - 1])[1]
+        kn_r = known_objects("675", 2434887.688819, 190.35549, -3.96212, 300.0); n_retry_sky = len(n_sky); del n_sky[:]
+        g["http_get"] = lambda url, **k_: (n_sky.append(1), sky_err)[1]
+        try:
+            known_objects("675", 2434887.688819, 190.35549, -3.96212, 300.0); r_sky = None
+        except RuntimeError as e:
+            r_sky = str(e)
+    finally:
+        g["http_get"], g["SKYBOT_RETRY_WAIT"] = saved, wait0
+    check(len(kn_r) == 3 and n_retry_sky == 2 and r_sky is not None and "not available" in r_sky and len(n_sky) == 3,
+          "SkyBoT: an error answer is asked again (SkyBoT sometimes fails a query that works later); after 3 the check fails")
+    qa = urllib.parse.parse_qs(urllib.parse.urlsplit(urls[0]).query) if urls else {}
+    check(urls and urls[0].startswith(SKYBOT_URL) and qa.get("-ep") == ["2434887.688819"] and qa.get("-observer") == ["675"]
+          and qa.get("-rs") == ["300"] and qa.get("-filter") == ["0"] and qa.get("-mime") == ["votable"],
+          "SkyBoT asked for the plate's time, site (-observer; SkyBoT ignores -loc) and cone, with no filter on errors")
+    dk = [math.hypot(k["xi"], k["eta"]) for k in kn]
+    check([k["label"] for k in kn] == ["50000 Quaoar", "409671 2005 YY236", "2008 UX294"] and kn[0]["V"] == 19.04
+          and abs(kn[2]["err"] - 13.986) < 1e-9 and kn[0]["cls"] == "KBO>Classical>Main" and kn[2]["dra"] == -8.5744
+          and max(abs(d_ - float(r_[7])) for d_, r_ in zip(dk, vo_rows)) < 0.01,
+          "SkyBoT rows read: names, V, error, class, motion, and distances as SkyBoT gives them (%s)"
+          % ", ".join("%.3f\"" % d_ for d_ in dk))
+    check(abs(kn[0]["xi"] + 0.585) < 0.01 and abs(kn[0]["eta"] - 0.263) < 0.01,
+          "SkyBoT offsets have the right signs: Quaoar %+.3f\" east, %+.3f\" north of the center" % (kn[0]["xi"], kn[0]["eta"]))
+    check(parse_skybot(sky_none, expect=(2434887.688819, 10.0, 85.0, 120)) == [],
+          "SkyBoT: 'No solar system object was found' is 'no objects'")
+    bad_vo = [("an HTML page", b"<html><body>Service unavailable</body></html>"),
+              ("JSON", b'[{"Name": "x"}]'),
+              ("a failed query", (vo_head % ("1", "x", q_ep)).replace('value="OK"', 'value="ERROR"', 1).encode()
+               + b"</vot:RESOURCE></vot:VOTABLE>"),
+              ("a resource error other than 'none found'", votable([], res_info='<vot:INFO name="QUERY_STATUS" value="ERROR">'
+                                                                         'Epoch out of range</vot:INFO>\n')),
+              ("'none found' with rows", votable(vo_rows[:1], res_info='<vot:INFO name="QUERY_STATUS" value="ERROR">No solar '
+                                                 'system object was found</vot:INFO>\n')),
+              ("an OK answer with no rows", votable([])),
+              ("an answer without nrows", votable(vo_rows, nrows="absent")),
+              ("fewer rows than nrows", votable(vo_rows, nrows=4)),
+              ("rows not as TABLEDATA", votable(vo_rows, data="<vot:DATA><vot:BINARY><vot:STREAM encoding=\"base64\">AAAA"
+                                                "</vot:STREAM></vot:BINARY></vot:DATA>\n")),
+              ("no position-error column", votable([r[:6] for r in vo_rows], fields="".join(vo_fields.split("\n")[:6]) + "\n")),
+              ("a row without a place", votable([("1", "x", "", "", "", "", "", "", "", "")])),
+              ("an answer for another epoch", votable(vo_rows, ep="2434888.688819")),
+              ("an answer for another cone", votable(vo_rows, cone="190.36548999999997-3.9621200000000001,rs=300"))]
+    for what, raw_ in bad_vo:
+        try:
+            parse_skybot(raw_, expect=(2434887.688819, 190.35549, -3.96212, 300))
+            check(False, "SkyBoT: %s is an error, not 'no objects'" % what)
+        except RuntimeError:
+            check(True, "SkyBoT: %s is an error, not 'no objects'" % what)
+    nk = [name_keys([x]) for x in ("50000 Quaoar (2002 LM60)", "(2026 ED138)", "2026", "2026ED138", "185643 (2040 P-L)",
+                                   "(50000) Quaoar")]
+    check(nk == [({"50000"}, {"quaoar", "2002 lm60"}), (set(), {"2026 ed138"}), ({"2026"}, set()), (set(), {"2026 ed138"}),
+                 ({"185643"}, {"2040 p-l"}), ({"50000"}, {"quaoar"})],
+          "names read as numbers, names and designations (Horizons' '50000 Quaoar (2002 LM60)'; '2026 ED138' is not 2026)")
+    check(_is_target(dict(num="50000", name="Quaoar"), name_keys(["2002 LM60", "50000 Quaoar (2002 LM60)"]))
+          and not _is_target(dict(num="", name="2026 BC12"), name_keys(["2026"]))
+          and not _is_target(dict(num="150000", name="Beta"), name_keys(["50000"]))
+          and not _is_target(dict(num="", name="C/2026 A1"), name_keys(["2026"])),
+          "the target is found by its exact number or name: '50000' is not '150000', '2026' is not '2026 BC12'")
+
+    def kobj(name, x, y, V, err, num="", cls="MB>Outer", dra=float("nan"), ddec=float("nan")):
+        return dict(num=num, name=name, label=(num + " " + name).strip(), xi=x, eta=y, V=V, err=err, cls=cls, dra=dra,
+                    ddec=ddec, ra=float("nan"), dec=float("nan"))
+    kc = [dict(dra_arcsec=0.0, ddec_arcsec=0.0, mag_g_scale=19.0),      # 0 the target's image
+          dict(dra_arcsec=50.0, ddec_arcsec=0.0, mag_g_scale=18.0),     # 1 at a well-placed known asteroid
+          dict(dra_arcsec=-50.0, ddec_arcsec=0.0, mag_g_scale=19.0),    # 2 at a known asteroid predicted 4.5 mag fainter
+          dict(dra_arcsec=0.0, ddec_arcsec=50.0, mag_g_scale=19.0),     # 3 40" from an object placed to 15" (3 sigma 45")
+          dict(dra_arcsec=100.0, ddec_arcsec=-100.0, mag_g_scale=19.0),  # 4 12" from a well-placed object
+          dict(dra_arcsec=-100.0, ddec_arcsec=100.0, mag_g_scale=19.0),  # 5 3" from a comet predicted much fainter
+          dict(dra_arcsec=150.0, ddec_arcsec=0.0, mag_g_scale=19.0),    # 6 20" from a moving asteroid's mid-exposure place,
+          dict(dra_arcsec=130.0, ddec_arcsec=20.0, mag_g_scale=19.0)]   # 7 5" from its path; 20" off its path
+    for c_ in kc:
+        c_.update(rejected="", note="")
+    objs = [kobj("Quaoar", 0.3, -0.2, 19.0, 3.6, num="50000", cls="KBO>Classical>Main"), kobj("Alpha", 52.0, 3.0, 18.5, 0.5, "12345"),
+            kobj("2010 AB1", -48.0, 1.0, 23.5, 0.4), kobj("2011 CD2", 0.0, 90.0, 19.0, 15.0),
+            kobj("2012 EF3", 30.0, 30.0, 19.0, 300.0), kobj("2013 GH4", 112.0, -100.0, 18.0, 1.0),
+            kobj("C/1954 A1", -103.0, 100.0, 25.0, 2.0, cls="Comet"), kobj("2015 XY1", 130.0, 0.0, 19.5, 1.0, dra=40.0, ddec=0.0),
+            kobj("2016 ZZ9", 20.0, 0.0, 24.5, 50.0), kobj("Beta", 400.0, 400.0, 18.0, 1.0, "150000")]
+    pcov = np.diag([(2.0 / 3.0) ** 2, (2.0 / 3.0) ** 2])  # a prediction good to 2" (3 sigma)
+    others, target, possible = known_object_verdicts(kc, objs, name_keys(["Quaoar", "50000"]), 45.0, 19.0, pcov)
+    rj = [c_["rejected"] for c_ in kc]
+    check([t_["name"] for t_ in target] == ["50000 Quaoar"] and len(others) == 9 and not possible,
+          "the target is set aside (and '50000' is not '150000 Beta')")
+    check(rj == ["", "known object 12345 Alpha", "", "", "", "", "known object 2015 XY1", ""]
+          and "too faint" in kc[2]["note"],
+          "asteroids placed to 5\": rejected within max(10\", 3 x error) of their path during the exposure; not one "
+          "2 mag fainter than the source, not 12\" away")
+    check(kc[3].get("known_uncertain") == ["2011 CD2"] and kc[5].get("known_uncertain") == ["C/1954 A1"]
+          and not any(c_.get("known_uncertain") for c_ in kc[:3] + kc[4:5] + kc[6:]),
+          "asteroids placed to 5-200\" and comets reject nothing and mark the sources they could be (an asteroid not if "
+          "far too faint); an asteroid placed to 300\" only listed")
+    ck_ = name_keys(["60558", "Echeclus", "60558 Echeclus (2000 EC98)"])  # SkyBoT's real rows for Echeclus, 1954 May 25
+    check(_is_target(dict(num="P/Echeclus", name="174P"), ck_) and _is_target(dict(num="60558", name="Echeclus"), ck_)
+          and not _is_target(dict(num="P/NEAT", name="166P"), ck_),
+          "the target's comet entry ('P/Echeclus 174P' for (60558) Echeclus) is the target too")
+    kc2 = [dict(dra_arcsec=0.0, ddec_arcsec=0.0, mag_g_scale=19.0, rejected="", note="")]
+    others2, target2, possible2 = known_object_verdicts(kc2, objs, name_keys(["2002 LM60"]), 45.0, 19.0, pcov)
+    check(not target2 and [p_["name"] for p_ in possible2] == ["50000 Quaoar"] and not kc2[0]["rejected"],
+          "a target listed by SkyBoT under another name is taken as possibly the target: it rejects nothing")
+    # ---------------- the DSS archive's pages: 'no plate here' against error pages (real answers of 31 Oct 2026:
+    # POSS-I red at RA 100, Dec -70, where POSS-I has no plates; and a request with Dec 95)
+    dss_none = (b'<HTML>\n'
+                b'<HEAD> <TITLE>ERROR</TITLE> </HEAD>\n'
+                b'<BODY>\n'
+                b'<H1>ERROR</H1>\n'
+                b'<P><HR><P>\n'
+                b'Something went wrong; the image file was not created.\n'
+                b'<PRE>\n'
+                b'data +06 40 00.00 -70 00 00.00 1.00 1.00\n'
+                b'Calibration and image data not available for field data...\n'
+                b'\n'
+                b'\n'
+                b'\t\t\t        GetImage\n'
+                b'\n'
+                b'\t\t\t       Version 3.0\n'
+                b'\n'
+                b'\t\t        Copyright (c) 1993-2005,\n'
+                b'      Association of Universities for Research in Astronomy, Inc.\n'
+                b'\t\t          All Rights Reserved.\n'
+                b'\n'
+                b'Reading plate list: /ifs/archive/ops/mast/public/dss/headers/poss1_red.v30.lis...\n'
+                b'List version 3\n'
+                b'\n'
+                b'\n'
+                b'Field                  RA(J2000)   Dec(J2000)  Region PlId   Epoch    X     Y   Width  Hght Dsc\n'
+                b'----                 ------------ ------------ ------ ---- -------- ----- ----- ----- ----- ---\n'
+                b'\n'
+                b'FATAL ERROR:\n'
+                b'\n'
+                b'\t"Aborting GetImage..."\n'
+                b'\n'
+                b'Program aborted.\n'
+                b'\n'
+                b'\n'
+                b'\n'
+                b'  REQUEST_URI: /cgi-bin/dss_search?v=poss1_red&r=100.000000&d=-70.000000&h=1.00&w=1.00&e=J2000&f=fits&c=none\n'
+                b'  UNIQUE_ID: auVY9VQzi-ZSJGI8zSk8UAAAAc4\n'
+                b'</PRE>\n'
+                b'<P><HR><P>\n'
+                b'<ADDRESS><A HREF="mailto:archive@stsci.edu">archive@stsci.edu</A></ADDRESS>\n'
+                b'\n'
+                b'</BODY>\n'
+                b'</HTML>\n')
+    dss_bad = (b'<HTML>\n'
+               b'<HEAD><TITLE>Error</TITLE></HEAD>\n'
+               b'<BODY>\n'
+               b'<H1>Error</H1>\n'
+               b'<P><HR><P>\n'
+               b'<PRE>\n'
+               b'RA out of range: 100.000000\n'
+               b'(0 < RA <= 24h or 360&deg;)\n'
+               b'\n'
+               b'<a href="/dss/dss_help.html#coordinates">Help on coordinates...</a>\n'
+               b'\n'
+               b'</PRE>\n'
+               b'<P><HR><P>\n'
+               b'<ADDRESS><A HREF="mailto:archive@stsci.edu">archive@stsci.edu</A></ADDRESS>\n'
+               b'\n'
+               b'</BODY>\n'
+               b'</HTML>\n')
+    dss_lost = dss_none.replace(b"----                 ------------ ------------ ------ ---- -------- ----- ----- ----- ----- ---\n",
+                                b"----                 ------------ ------------ ------ ---- -------- ----- ----- ----- ----- ---\n"
+                                b"XE111                06 40 00.00 -70 00 00.00 XE111  0ABC 1954.123 10000 10000   300   300  1\n")
+    dss_busy = b"<HTML><BODY><H1>Busy</H1>The jukebox is busy; please try again later.</BODY></HTML>"
+    check(dss_page(dss_none)[0] == "none" and all(dss_page(x)[0] == "error" for x in (dss_bad, dss_lost, dss_busy, b"")),
+          "DSS: the 'no plate here' page is told apart from error pages (busy, bad request, a listed plate not made)")
+    calls = []
+    g = globals(); saved = (g["http_get"], g["DSS_RETRY_WAIT"])
+    fake_fits = io.BytesIO()
+    hf = make_header(169.85, -10.95, n=40)
+    fits.PrimaryHDU(np.zeros((40, 40), np.int16), hf).writeto(fake_fits)
+    try:
+        g["DSS_RETRY_WAIT"] = 0.0
+        g["http_get"] = lambda url, **k_: (calls.append(url), dss_none)[1]
+        r_none = fetch_dss("poss1_red", 100.0, -70.0, 1.0); n_none = len(calls); del calls[:]
+        answers = [dss_busy, dss_busy, fake_fits.getvalue()]
+        g["http_get"] = lambda url, **k_: (calls.append(url), answers[len(calls) - 1])[1]
+        r_retry = fetch_dss("poss1_red", 169.85, -10.95, 1.0); n_retry = len(calls); del calls[:]
+        g["http_get"] = lambda url, **k_: (calls.append(url), dss_busy)[1]
+        try:
+            fetch_dss("poss1_red", 169.85, -10.95, 1.0); r_err = None
+        except RuntimeError as e:
+            r_err = str(e)
+        n_err = len(calls)
+    finally:
+        g["http_get"], g["DSS_RETRY_WAIT"] = saved
+    check(r_none is None and n_none == 1, "DSS: 'no plate here' is no plate, asked once")
+    bare = io.BytesIO(); fits.PrimaryHDU(np.zeros((10, 10), np.int16)).writeto(bare)
+    try:
+        g["http_get"] = lambda url, **k_: bare.getvalue()
+        try:
+            fetch_dss("poss1_red", 169.85, -10.95, 1.0); r_bare = "no error"
+        except RuntimeError as e:
+            r_bare = str(e)
+    finally:
+        g["http_get"] = saved[0]
+    check("plate solution" in r_bare, "DSS: a FITS answer without a plate solution is an error, not 'no plate'")
+    check(r_retry is not None and n_retry == 3 and r_err is not None and "error page" in r_err and n_err == 3,
+          "DSS: an error page is asked again, and after 3 an error, never 'no plate' (%s)" % (r_err or "")[:60])
+    # ---------------- the JSON writer and --object
+    jp = os.path.join(tmp, "nan.json")
+    write_json(jp, dict(a=float("nan"), b=[float("inf"), np.float64("nan"), np.int64(5), 1.5], c=(1, "x")))
+
+    def strict(c_):
+        raise ValueError(c_)
+    try:
+        jr = json.loads(open(jp).read(), parse_constant=strict)
+        check(jr == dict(a=None, b=[None, None, 5, 1.5], c=[1, "x"]), "results.json is standard JSON: NaN and infinity as null")
+    except ValueError as e:
+        check(False, "results.json is standard JSON: NaN and infinity as null (%s)" % e)
+    oc = [object_subject("2026ED138", [1950, 1958]), object_subject("(50000) Quaoar", [1950, 1958], ["poss1_red"]),
+          object_subject("Quaoar", [1975, 2000]), object_subject("2026", [1954, 1954]), object_subject("2040 P-L", [1960, 1960]),
+          object_subject("2026 ed138", [1954, 1954]), object_subject("(2026 ED138)", [1954, 1954]),
+          object_subject("1125 t-2", [1954, 1954])]
+    check(oc[0][0]["horizons_command"] == "DES=2026 ED138;" and oc[0][0]["names"] == ["2026 ED138"]
+          and oc[0][1] == "2026_ED138_1950-1958" and "surveys" not in oc[0][0]
+          and oc[1][0]["horizons_command"] == "50000;" and oc[1][0]["names"] == ["50000", "Quaoar"]
+          and oc[1][0]["surveys"] == ["poss1_red"] and oc[2][0]["horizons_command"] == "Quaoar;"
+          and oc[3][0]["horizons_command"] == "2026;" and oc[4][0]["horizons_command"] == "DES=2040 P-L;"
+          and oc[5][0]["horizons_command"] == oc[6][0]["horizons_command"] == "DES=2026 ED138;"
+          and oc[5][1] == "2026_ED138_1954-1954" and oc[7][0]["horizons_command"] == "DES=1125 T-2;",
+          "--object: designation, number and name read (%s)" % "; ".join(o_[0]["horizons_command"] for o_ in oc))
+    nbad = 0
+    for args_ in (("C/2019 Y4", [1950, 1958]), ("2026 ED138", [1958, 1950]), ("2026 ED138", [1950, 1958], ["poss3"]),
+                  ("2026 A1", [1950, 1958])):
+        try:
+            object_subject(*args_)
+        except ValueError:
+            nbad += 1
+    check(nbad == 4, "--object refuses a comet designation, reversed years, an unknown survey and '2026 A1'")
+    mm = []
+    for cf_, tg_ in ((dict(designation="x", names=["Quaoar", "50000"], horizons_command="50000;"), "50000 Quaoar (2002 LM60)"),
+                     (dict(designation="x", names=["2026", "ed138"], horizons_command="2026;"), "2026 Cottrell (1955 FF)"),
+                     (dict(designation="x", names=["Eris"], horizons_command="Eris;"), "136199 Eris (2003 UB313)")):
+        try:
+            check_target_names(cf_, tg_); mm.append(True)
+        except SubjectMismatch:
+            mm.append(False)
+    check(mm == [True, False, True], "the plan stops when the subject's names are not names of the object Horizons found")
     # ---------------- 3. the measuring scenario
     ra_c, dec_c = 169.85, -10.95
     h1 = make_header(ra_c, dec_c)
@@ -1725,8 +2327,8 @@ def self_test():
     pl = dict(survey="poss1_red", plate="XP000_T1", pred_ra=pra, pred_dec=pdec, V=18.9,
               ra3=math.hypot(90 * ux, 3 * vx), dec3=math.hypot(90 * uy, 3 * vy), smaa=90.0, smia=3.0, theta=TH,
               rate=3.0, mid=inf["mid"].isoformat())
-    known = lambda site, jd, ra, dec, half: [("selftest (2026 ST1)", OBJ[0], OBJ[1], 18.6),  # noqa: E731
-                                             ("12345 Test (1990 AB)", KNO[0], KNO[1], 18.5)]
+    known = lambda site, jd, ra, dec, rad: [kobj("selftest", OBJ[0] + 0.4, OBJ[1], 18.6, 1.0, cls="KBO"),  # noqa: E731
+                                            kobj("Test", KNO[0], KNO[1], 18.5, 0.5, num="12345")]
     cfg = dict(designation="selftest", names=["selftest"], box_factor=1.5, nsig=4.0)
     res, cands = measure_one(cfg, out, pl, gaia_fn=lambda ra, dec, r: gcat, known_fn=known, show=True)
     log("  astrometry: %s refs, rms %s\"; in box %s, not rejected %s, within 3 sigma %s: %s" % (
@@ -1761,6 +2363,9 @@ def self_test():
     check(c is not None and "Gaia star" in c["rejected"], "the Gaia star without proper motion is rejected")
     c = at(KNO)
     check(c is not None and "known object" in c["rejected"], "the known asteroid is rejected")
+    st_ = res.get("skybot_target")
+    check(isinstance(st_, list) and len(st_) == 1 and st_[0]["name"] == "selftest" and res.get("known_objects_in_box")
+          == ["12345 Test"], "SkyBoT's entry for the target is kept apart (%s)" % (st_,))
     prov = [c for c in cands if "Gaia star" not in c["rejected"] and "flaw" not in c["rejected"]
             and not (c.get("err_parts") and np.all(np.isfinite(c["err_parts"]["injected"][:2])))]
     check(not prov, "every source in the box gets plate-based error bars, however far (%d left with formal only)" % len(prov))
@@ -1769,6 +2374,22 @@ def self_test():
     pl2 = dict(pl, ra3=float("nan"), dec3=float("nan"), smaa=float("nan"), smia=float("nan"), theta=float("nan"))
     r2, _ = measure_one(cfg, out, pl2, gaia_fn=lambda ra, dec, r: gcat, known_fn=known, show=False)
     check(r2["status"].startswith("refused"), "no uncertainty from Horizons -> refused (%s)" % r2["status"])
+    known_u = lambda site, jd, ra, dec, rad: known(site, jd, ra, dec, rad) + [kobj("2014 XY9", OBJ[0] + 20.0, OBJ[1], 18.7, 100.0)]  # noqa: E731
+    ru, cu = measure_one(cfg, out, pl, gaia_fn=lambda ra, dec, r: gcat, known_fn=known_u, show=False)
+    check(ru.get("result") == "unique candidate within 3 sigma" and "could be known object 2014 XY9" in ru.get("flag", "")
+          and ru.get("reportable") is False, "a candidate that could be a known object with an uncertain place stays the "
+          "candidate, flagged and not reportable")
+    known_b = lambda site, jd, ra, dec, rad: known(site, jd, ra, dec, rad) + [kobj("Other", OBJ[0], OBJ[1], 18.6, 0.5, "23456")]  # noqa: E731
+    rb_, _ = measure_one(cfg, out, pl, gaia_fn=lambda ra, dec, r: gcat, known_fn=known_b, show=False)
+    check(rb_.get("result") == "no candidate within 3 sigma" and "rejected as a known object" in rb_.get("flag", "")
+          and rb_.get("reportable") is False, "a known object rejected inside the prediction's 3-sigma region flags the plate, "
+          "and a plate with no candidate is not reportable")
+    known_c = lambda site, jd, ra, dec, rad: [kobj("Alias", OBJ[0] + 0.4, OBJ[1], 18.6, 1.0, "99999", cls="KBO"),  # noqa: E731
+                                              kobj("Test", KNO[0], KNO[1], 18.5, 0.5, num="12345")]
+    rc_, _ = measure_one(cfg, out, pl, gaia_fn=lambda ra, dec, r: gcat, known_fn=known_c, show=False)
+    check(rc_.get("result") == "unique candidate within 3 sigma" and "under another name" in rc_.get("flag", "")
+          and rc_.get("reportable") is False and [o_["name"] for o_ in rc_.get("known_possible_target", [])] == ["99999 Alias"],
+          "the target listed by SkyBoT under a name the subject doesn't give is not rejected; the plate is flagged")
     check("no other-date plate" not in res.get("flag", "") and "runs off" not in res.get("flag", ""),
           "with a comparison plate and the box on the cutout, neither is flagged (%s)" % res.get("flag"))
     # ---- blends: a candidate 1.05 FWHM from a brighter fixed source
@@ -1832,6 +2453,49 @@ def self_test():
               "archive errors stop the plan (no plan.json, status INCOMPLETE) instead of reporting no plates")
     finally:
         g["horizons_track"], g["fetch_dss"] = saved
+    # ---- an error at the check that the object is on a plate also stops the plan, and so does a Horizons failure
+    out6 = subject_paths(tmp, "selftest_plan2")
+    saved = (g["horizons_track"], g["fetch_dss"], g["horizons_at"])
+    try:
+        def h_fail(*a_, **k_):
+            raise RuntimeError("GET failed after 3 tries: (HTTP Error 503)")
+        g["horizons_track"] = h_fail
+        try:
+            step_plan(dict(designation="selftest", horizons_command="x;", years=[1954, 1954], surveys=["poss1_red"]), out6)
+            h_stopped = False
+        except PlanIncomplete:
+            h_stopped = True
+        check(h_stopped and open(os.path.join(out6, "plan_status.txt")).read().startswith("INCOMPLETE"),
+              "a JPL Horizons failure stops the plan as incomplete")
+        g["horizons_track"] = lambda *a_, **k_: [dict(t=dt.datetime(1954, 3, 10) + dt.timedelta(days=5 * j), ra=169.85,
+                                                   dec=-10.95, elong=150.0) for j in range(2)]
+        g["horizons_at"] = lambda *a_, **k_: dict(ra=pra, dec=pdec, dra=1.0, ddec=0.5, V=19.0, ra3=2.0, dec3=2.0, smaa=2.0,
+                                                  smia=1.0, theta=0.0)
+        n_calls = []
+
+        def dss_then_error(*a_, **k_):
+            n_calls.append(1)
+            if len(n_calls) > 1:
+                raise RuntimeError("DSS poss1_red: the archive answered with an error page, not an image, 3 times")
+            return fits.PrimaryHDU(img1, h1)
+        g["fetch_dss"] = dss_then_error
+        stopped = False
+        try:
+            step_plan(dict(designation="selftest", horizons_command="x;", years=[1954, 1954], surveys=["poss1_red"]), out6)
+        except PlanIncomplete:
+            stopped = True
+        st = open(os.path.join(out6, "plan_status.txt")).read() if os.path.exists(os.path.join(out6, "plan_status.txt")) else ""
+        check(stopped and len(n_calls) == 2 and not os.path.exists(os.path.join(out6, "plan.json")) and st.startswith("INCOMPLETE"),
+              "an archive error while checking that the object is on a plate stops the plan")
+        g["fetch_dss"] = lambda *a_, **k_: fits.PrimaryHDU(img1, h1)
+        with open(os.path.join(out6, "fetch_status.txt"), "w") as f:
+            f.write("COMPLETE earlier\n")
+        step_plan(dict(designation="selftest", horizons_command="x;", years=[1954, 1954], surveys=["poss1_red"]), out6)
+        check(os.path.exists(os.path.join(out6, "plan.json")) and
+              open(os.path.join(out6, "fetch_status.txt")).read().startswith("INCOMPLETE"),
+              "a new plan needs a new fetch before measuring")
+    finally:
+        g["horizons_track"], g["fetch_dss"], g["horizons_at"] = saved
     # ---- fetching: the cutout holds the whole search box, a kept cutout that doesn't is fetched again, other-date
     # plates come from every survey, and an incomplete plan stops fetching
     out5 = subject_paths(tmp, "selftest_fetch")
@@ -1850,6 +2514,39 @@ def self_test():
         step_fetch(cf, out5); run2 = list(calls); del calls[:]
         step_fetch(dict(cf, min_box_arcsec=20.0), out5); run3 = list(calls); del calls[:]
         step_fetch(dict(cf, min_box_arcsec=2000.0), out5); run4 = list(calls); del calls[:]
+        def dss_err(sv, ra, dec, size, path=None):
+            if sv == "quickv":
+                raise RuntimeError("DSS quickv: the archive answered with an error page, not an image, 3 times")
+            return fake_dss(sv, ra, dec, size, path)
+        g["fetch_dss"] = dss_err
+        os.remove(os.path.join(out5, "cutouts", "poss1_red_XP000_T1__target.fits"))
+        try:
+            step_fetch(cf, out5); f_stopped = False
+        except FetchIncomplete:
+            f_stopped = True
+        fst = open(os.path.join(out5, "fetch_status.txt")).read()
+        try:
+            step_measure(cf, out5); m_stopped = False
+        except FetchIncomplete:
+            m_stopped = True
+        g["fetch_dss"] = fake_dss
+        step_fetch(cf, out5); del calls[:]
+        fst2 = open(os.path.join(out5, "fetch_status.txt")).read()
+
+        def dss_stop(sv, ra, dec, size, path=None):
+            raise KeyboardInterrupt
+        g["fetch_dss"] = dss_stop
+        os.remove(os.path.join(out5, "cutouts", "poss1_red_XP000_T1__target.fits"))
+        try:
+            step_fetch(cf, out5)
+        except KeyboardInterrupt:
+            pass
+        try:
+            step_measure(cf, out5); i_stopped = False
+        except FetchIncomplete:
+            i_stopped = True
+        g["fetch_dss"] = fake_dss
+        step_fetch(cf, out5); del calls[:]
         with open(os.path.join(out5, "plan_status.txt"), "w") as f:
             f.write("INCOMPLETE test\n")
         try:
@@ -1858,6 +2555,9 @@ def self_test():
             stopped = True
     finally:
         g["fetch_dss"] = saved
+    check(f_stopped and fst.startswith("INCOMPLETE") and "quickv" in fst and m_stopped and fst2.startswith("COMPLETE"),
+          "a failed download stops the fetch and the measuring until a later --fetch gets everything")
+    check(i_stopped, "an interrupted fetch is not measured")
     check(run1 and run1[0][0] == "poss1_red" and run1[0][1] >= 2 * 400.0 / 60.0 + 4.0 - 1e-9,
           "the target cutout holds the whole search box (%.1f')" % (run1[0][1] if run1 else float("nan")))
     check(sorted(sv for sv, _ in run1[1:]) == sorted(SURVEYS), "other-date plates are asked from every survey (%s)"
@@ -1901,9 +2601,45 @@ def self_test():
 
 # ------------------------------------------------------------------------------------------------- main
 
+def object_subject(obj, years, surveys=None):
+    """a subject for --object: '50000', '(50000) Quaoar' or '50000 Quaoar' (numbered), '2026 ED138', '2026ED138' or
+    '2040 P-L' (designation), or a name ('Quaoar'). Returns (cfg, output folder name)."""
+    s = re.sub(r"\s+", " ", str(obj)).strip()
+    mp = re.match(r"^\((.*)\)$", s)
+    if mp and _desig(mp.group(1)):  # '(2026 ED138)', as Horizons prints it
+        s = mp.group(1).strip()
+    des = _desig(s)
+    m = re.match(r"^\(?(\d+)\)?(?: ([A-Za-z][A-Za-z' -]*))?$", s)  # a number, then only a name
+    if des:  # checked first: '2026 ED138' and '2040 P-L' are designations, not number 2026 or 2040 with a name
+        cfg = dict(designation=des, names=[des], horizons_command="DES=%s;" % des)
+    elif m:
+        names = [m.group(1)] + ([m.group(2)] if m.group(2) else [])
+        cfg = dict(designation=" ".join(names), names=names, horizons_command="%s;" % m.group(1))
+    elif re.match(r"^[A-Za-z][A-Za-z' -]{1,40}$", s):
+        cfg = dict(designation=s, names=[s], horizons_command="%s;" % s)
+    else:
+        raise ValueError("--object: give a number, a provisional designation or a name (got %r)" % obj)
+    y0, y1 = int(years[0]), int(years[1])
+    if not (1889 < y0 <= y1 < 2060):
+        raise ValueError("--years: two years, first <= last, between 1890 and 2059 (got %s %s)" % (years[0], years[1]))
+    cfg.update(years=[y0, y1], box_factor=1.5, min_box_arcsec=60.0, cutout_arcmin=10.0,
+               note="made by --object (precovery.py %s)" % VERSION)
+    if surveys:
+        bad = [v for v in surveys if v not in SURVEYS]
+        if bad:
+            raise ValueError("--surveys: unknown %s (known: %s)" % (", ".join(bad), ", ".join(SURVEYS)))
+        cfg["surveys"] = list(surveys)
+    return cfg, safe_name("%s_%d-%d" % (cfg["designation"].replace(" ", "_"), y0, y1))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("subject", nargs="?", help="a name in targets/precovery/ (without .json), or a path to a .json file")
+    ap.add_argument("--object", metavar="NAME", help="search for this object instead of a subject file: a number "
+                    "(50000), a provisional designation (2026 ED138) or a name (Quaoar); needs --years")
+    ap.add_argument("--years", nargs=2, type=int, metavar=("FIRST", "LAST"), help="with --object: the years to search")
+    ap.add_argument("--surveys", nargs="+", metavar="SURVEY", help="with --object: the DSS surveys to search "
+                    "(default: all of %s)" % ", ".join(SURVEYS))
     ap.add_argument("--plan", action="store_true", help="only find the plates")
     ap.add_argument("--fetch", action="store_true", help="only download the cutouts")
     ap.add_argument("--measure", action="store_true", help="only measure the downloaded cutouts")
@@ -1924,7 +2660,7 @@ def main():
             try:
                 hdu = fetch_dss(sv, a.probe[0], a.probe[1], 1.0)
                 if hdu is None:
-                    log("  %-16s no image (the archive answered with a page, not FITS)" % sv)
+                    log("  %-16s no plate here (the archive says this survey has none)" % sv)
                     continue
                 hh = hdu.header
                 raw = "  ".join("%s=%r" % (k, hh.get(k)) for k in ("DATE-OBS", "UT", "EXPOSURE", "EPOCH", "PLTLABEL",
@@ -1938,12 +2674,27 @@ def main():
                 log("  %-16s error: %s" % (sv, e))
             time.sleep(0.5)
         return
-    if not a.subject:
-        ap.error("give a subject")
-    sf = a.subject if a.subject.endswith(".json") else os.path.join(a.root, "targets", "precovery", a.subject + ".json")
-    cfg = json.load(open(sf))
-    name = os.path.splitext(os.path.basename(sf))[0]
-    out = subject_paths(a.root, name)
+    if a.object:
+        if a.subject:
+            ap.error("give a subject or --object, not both")
+        if not a.years:
+            ap.error("--object needs --years FIRST LAST")
+        try:
+            cfg, name = object_subject(a.object, a.years, a.surveys)
+        except ValueError as e:
+            ap.error(str(e))
+        out = subject_paths(a.root, name)
+        if a.plan or not (a.fetch or a.measure):  # what was planned: give this file to rerun it, or edit it
+            write_json(os.path.join(out, name + ".json"), cfg)
+    else:
+        if not a.subject:
+            ap.error("give a subject, or --object NAME --years FIRST LAST")
+        if a.years or a.surveys:
+            ap.error("--years and --surveys go with --object; a subject file sets them itself")
+        sf = a.subject if a.subject.endswith(".json") else os.path.join(a.root, "targets", "precovery", a.subject + ".json")
+        cfg = json.load(open(sf))
+        name = os.path.splitext(os.path.basename(sf))[0]
+        out = subject_paths(a.root, name)
     log("precovery.py %s  subject %s  -> %s" % (VERSION, cfg["designation"], out))
     every = not (a.plan or a.fetch or a.measure)
     if a.plan or every:
@@ -1951,6 +2702,9 @@ def main():
             step_plan(cfg, out)
         except PlanIncomplete:
             sys.exit(3)
+        except SubjectMismatch as e:
+            log("STOPPED: %s" % e)
+            sys.exit(2)
     try:
         if a.fetch or every:
             step_fetch(cfg, out)

@@ -26,7 +26,8 @@
   "rate": 2.473905698627173,
   "dra_rate": -2.36556,
   "ddec_rate": 0.72411,
-  "on_plate": true
+  "on_plate": true,
+  "target_name": "50000 Quaoar (2002 LM60)"
  },
  {
   "survey": "phase2_gsc1",
@@ -57,6 +58,7 @@
   "rate": 0.6839802003713266,
   "dra_rate": -0.68364,
   "ddec_rate": -0.02157,
-  "on_plate": true
+  "on_plate": true,
+  "target_name": "50000 Quaoar (2002 LM60)"
  }
 ]
