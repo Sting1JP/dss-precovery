@@ -7,8 +7,11 @@ Steps (each can be run alone; results go to output/precovery/<subject>/):
   --fetch    for each kept plate: exact position at the plate's mid-exposure (JPL Horizons, plate site),
              a cutout of the target plate there, and cutouts of the same sky from the other surveys (other dates).
   --measure  astrometry refit to Gaia DR3 moved to the plate epoch; sources in the search box that are not
-             Gaia stars and are not on the other-date plates; offsets from the prediction; pictures to blink.
+             Gaia stars and are not on the other-date plates; offsets from the prediction; magnitudes on POSS-I
+             plates (tools/magnitudes.py); pictures to blink.
   (no step)  all three.
+  --ades SETTINGS.json  after measuring, the report file for the Minor Planet Center (ADES PSV) with the reportable
+             positions (tools/mpc_report.py).
   --self-test  synthetic plates; no network.
 
 A subject is a file in targets/precovery/, or an object given with --object NAME --years FIRST LAST.
@@ -21,6 +24,9 @@ import argparse, csv, datetime as dt, io, json, math, os, re, shutil, ssl, sys, 
 import numpy as np
 from scipy import ndimage
 
+import magnitudes
+import mpc_report
+
 try:  # no downloads by astropy itself; only astropy.io.fits is used
     from astropy.utils import data as _apdata, iers as _apiers
     _apdata.conf.allow_internet = False
@@ -28,7 +34,7 @@ try:  # no downloads by astropy itself; only astropy.io.fits is used
 except Exception:  # noqa
     pass
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 HOSTS = {"archive.stsci.edu", "ssd.jpl.nasa.gov", "gea.esac.esa.int", "ssp.imcce.fr"}
 SAFE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]{0,80}$")
 UA = "dss-precovery/%s (+https://github.com/Sting1JP/dss-precovery)" % VERSION
@@ -368,11 +374,14 @@ def plate_info(h):
                     reportable = False
         else:
             csrc = "survey median"
+        clock_min, clock_src = tau, ("Hill 2026 per-plate value" if clk else "survey median of Hill 2026")
+        clock_partner = region.startswith("XO")  # a blue plate takes its red partner's clock
         time_note = "POSS-I: hours+hundredths, start, clock %+.2f min (%s); date %+d d from %s" % (tau, csrc, off, src)
         if region.startswith("XE") and exp < 10:
             flags.append("red exposure %.1f min may be a slipped decimal (x10)" % exp)
             reportable = False
     else:
+        clock_min = clock_src = clock_partner = None
         if mm > 59:
             raise ValueError("minutes %d > 59 in %r on a non-POSS-I plate: convention unknown" % (mm, d))
         t_hdr = dt.datetime(day.year, day.month, day.day) + dt.timedelta(hours=hh, minutes=mm, seconds=ss)
@@ -387,7 +396,8 @@ def plate_info(h):
     return dict(start=start, mid=start + dt.timedelta(minutes=exp / 2.0), exp_min=exp, telescope=tel, site=site,
                 mpc=mpc, plate=safe_name("%s_%s" % (region, str(h.get("PLATEID", "")).strip())),
                 label=label, flag="; ".join(flags), time_note=time_note, reportable=reportable,
-                header_dateobs=d, clock_sigma_min=(clock_sig if poss1 else None))
+                header_dateobs=d, clock_sigma_min=(clock_sig if poss1 else None), clock_min=clock_min,
+                clock_source=clock_src, clock_from_partner=clock_partner)
 
 def comparison_info(h):
     """plate_info() for an other-date (comparison) plate. A comparison only needs its date to within a day, so a
@@ -553,8 +563,9 @@ GAIA_CAP = 300000
 
 
 def gaia_cone(ra, dec, radius_deg, gmax=21.0):
-    """every Gaia DR3 source in the cone (with or without proper motion); refuses a result at the row cap"""
-    adql = ("SELECT TOP %d source_id, ra, dec, pmra, pmdec, phot_g_mean_mag FROM gaiadr3.gaia_source "
+    """every Gaia DR3 source in the cone (with or without proper motion): ra, dec, pmra, pmdec, G, BP-RP (nan where
+    Gaia has none); refuses a result at the row cap"""
+    adql = ("SELECT TOP %d source_id, ra, dec, pmra, pmdec, phot_g_mean_mag, bp_rp FROM gaiadr3.gaia_source "
             "WHERE 1=CONTAINS(POINT('ICRS',ra,dec), CIRCLE('ICRS',%.7f,%.7f,%.5f)) "
             "AND (phot_g_mean_mag < %.2f OR phot_g_mean_mag IS NULL)" % (GAIA_CAP, ra, dec, radius_deg, gmax))
     q = urllib.parse.urlencode(dict(REQUEST="doQuery", LANG="ADQL", FORMAT="csv", QUERY=adql, MAXREC=str(GAIA_CAP)))
@@ -569,14 +580,38 @@ def gaia_cone(ra, dec, radius_deg, gmax=21.0):
                 return float(r[k])
             except (ValueError, TypeError):
                 return float("nan")
-        rows.append((f("ra"), f("dec"), f("pmra"), f("pmdec"), f("phot_g_mean_mag")))
+        rows.append((f("ra"), f("dec"), f("pmra"), f("pmdec"), f("phot_g_mean_mag"), f("bp_rp")))
     if len(rows) >= GAIA_CAP:
         raise RuntimeError("Gaia query hit the %d-row cap; refusing a truncated star list" % GAIA_CAP)
-    return np.array(rows, float).reshape(-1, 5)
+    return np.array(rows, float).reshape(-1, 6)
+
+
+def gaia_faint_cone(ra, dec, radius_deg, gmin=21.0):
+    """the Gaia DR3 sources of G >= gmin in the cone, which gaia_cone leaves out (same columns): for the magnitude
+    calibration's rule that no other Gaia source lies near a calibration star"""
+    adql = ("SELECT TOP %d source_id, ra, dec, pmra, pmdec, phot_g_mean_mag, bp_rp FROM gaiadr3.gaia_source "
+            "WHERE 1=CONTAINS(POINT('ICRS',ra,dec), CIRCLE('ICRS',%.7f,%.7f,%.5f)) AND phot_g_mean_mag >= %.2f"
+            % (GAIA_CAP, ra, dec, radius_deg, gmin))
+    q = urllib.parse.urlencode(dict(REQUEST="doQuery", LANG="ADQL", FORMAT="csv", QUERY=adql, MAXREC=str(GAIA_CAP)))
+    raw = http_get("https://gea.esac.esa.int/tap-server/tap/sync?" + q).decode("utf-8", "replace")
+    if not raw.startswith("source_id"):
+        raise RuntimeError("Gaia archive: unexpected answer %r" % raw[:200])
+    rows = []
+    for r in csv.DictReader(io.StringIO(raw)):
+        def f(k):
+            try:
+                return float(r[k])
+            except (ValueError, TypeError):
+                return float("nan")
+        rows.append((f("ra"), f("dec"), f("pmra"), f("pmdec"), f("phot_g_mean_mag"), f("bp_rp")))
+    if len(rows) >= GAIA_CAP:
+        raise RuntimeError("Gaia query hit the %d-row cap; refusing a truncated star list" % GAIA_CAP)
+    return np.array(rows, float).reshape(-1, 6)
 
 
 def gaia_at_epoch(cat, year):
-    """Gaia DR3 (epoch 2016.0) moved to the plate epoch. Columns: ra, dec, G, has_pm (1/0).
+    """Gaia DR3 (epoch 2016.0) moved to the plate epoch. Columns: ra, dec, G (21 where Gaia has none), has_pm (1/0),
+    BP-RP (nan where Gaia has no G or no color, or the catalog has no color column).
     Sources without proper motion stay at their 2016 position (they are still stars to reject; not references)."""
     has = np.isfinite(cat[:, 2]) & np.isfinite(cat[:, 3])
     dty = year - 2016.0
@@ -584,7 +619,9 @@ def gaia_at_epoch(cat, year):
     dec = cat[:, 1] + pmde * dty / 3.6e6
     ra = cat[:, 0] + pmra * dty / 3.6e6 / np.cos(np.radians(cat[:, 1]))
     g = np.where(np.isfinite(cat[:, 4]), cat[:, 4], 21.0)
-    return np.column_stack([ra, dec, g, has.astype(float)])
+    bprp = cat[:, 5] if cat.shape[1] > 5 else np.full(len(cat), np.nan)
+    bprp = np.where(np.isfinite(cat[:, 4]), bprp, np.nan)
+    return np.column_stack([ra, dec, g, has.astype(float), bprp])
 
 
 SKYBOT_URL = "https://ssp.imcce.fr/webservices/skybot/api/conesearch.php"
@@ -1458,7 +1495,7 @@ def amp_from_flux(flux_ap, sigma_px):
     return flux_ap / (2.0 * math.pi * sigma_px ** 2 * (1.0 - math.exp(-4.5 / sigma_px ** 2)))
 
 
-def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
+def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None, gaia_faint_fn=None):
     from astropy.io import fits
     rng = np.random.default_rng(12345)  # fixed, so a rerun gives the same numbers
     tag = "%s_%s" % (pl["survey"], pl["plate"])
@@ -1475,6 +1512,10 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
                theta=pl.get("theta"), pred_ra=pl["pred_ra"], pred_dec=pl["pred_dec"], flag=info["flag"],
                time_note=info["time_note"], reportable=info["reportable"], header_dateobs=info["header_dateobs"],
                clock_sigma_min=info.get("clock_sigma_min"))
+    res.update(region=str(h.get("REGION", "")).strip(), label=info["label"], emulsion=str(h.get("EMULSION", "")).strip(),
+               clock_min=info.get("clock_min"), clock_source=info.get("clock_source"),
+               clock_from_partner=info.get("clock_from_partner"),
+               target_name=pl.get("target_name", ""))
     cov_o, cov_src = ellipse_cov(pl)
     res["uncertainty_source"] = cov_src
     if cov_o is None:
@@ -1486,6 +1527,7 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
     gcat = gaia_fn(ra0, dec0, size_deg * 0.75)
     gep = gaia_at_epoch(gcat, year)
     det, noise, sigma_px = detect(img, cfg.get("nsig", 4.0))
+    det_cal = det.copy()  # every detection as first fitted, for the magnitude calibration
     r_img = residual_image(img)
     res["n_det"] = len(det)
     fit = fit_astrometry(det, h, gep, ra0, dec0)
@@ -1548,6 +1590,7 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
     # is pulled toward the neighbor); keep the one-source position to size the effect
     blend_px = cfg.get("blend_fwhm", 2.0) * 2.3548 * sigma_px
     single = {}
+    amp_one = {}  # the peak from the one-source fit, for the magnitude's deblending error
     for i in range(len(det)):
         if abs(dxi[i]) > bx or abs(deta[i]) > by or blend_px <= 0:
             continue
@@ -1561,6 +1604,7 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
         if pj is None:
             continue
         single[i] = (float(det[i, 0]), float(det[i, 1]), [round(float(dd[j]) * scale, 1) for j in nbr])
+        amp_one[i] = float(det[i, 9])
         det[i, 0], det[i, 1], det[i, 9] = pj[0] + 1.0, pj[1] + 1.0, pj[2]
     if single:
         ra, dec = apply_astrometry(fit, det[:, 0], det[:, 1])
@@ -1582,7 +1626,7 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
                           dra_arcsec=round(float(dxi[i]), 2), ddec_arcsec=round(float(deta[i]), 2),
                           snr=round(float(det[i, 3]), 1), mag_g_scale=round(mag, 2), conc_rel=round(float(conc_rel), 2),
                           fwhm_px=round(float(det[i, 5]), 2), flux=float(det[i, 2]),
-                          amp=float(det[i, 9]) if np.isfinite(det[i, 9]) else float(det[i, 6]),
+                          amp=float(det[i, 9]) if np.isfinite(det[i, 9]) else float(det[i, 6]), amp_fit=float(det[i, 9]),
                           gaia_star_within=round(dstar, 2), gaia_radius=round(srad, 2),
                           sig_ra_arcsec=sx, sig_dec_arcsec=sy, err_source="formal (provisional)",
                           bright_star_within_12=bool(np.any(nb)), static_test=[]))
@@ -1591,6 +1635,7 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
             s_xi, s_eta = tangent(sr, sd, ra0, dec0)
             cands[-1]["blend"] = dict(neighbors_arcsec=single[i][2],
                                       shift_from_one_source_fit=[round(float(dxi[i] - s_xi[0]), 2), round(float(deta[i] - s_eta[0]), 2)])
+            cands[-1]["amp_one_source"] = amp_one[i]
 
     def mahal(c):
         C = cov_o + np.diag([c["sig_ra_arcsec"] ** 2, c["sig_dec_arcsec"] ** 2])
@@ -1699,6 +1744,39 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
     for c in cands:
         for kk in ("sig_ra_arcsec", "sig_dec_arcsec", "dist_sigma"):
             c[kk] = round(float(c[kk]), 3)
+    # ---- magnitudes (POSS-I plates): each source calibrated on the isolated Gaia stars of similar brightness on this
+    # plate; noise from fitted peaks at empty places (its own random draws, so the error bars above are unchanged)
+    band = magnitudes.plate_band(h)
+    res["band"] = band
+    if band is not None:
+        trail = pl.get("rate", float("nan")) * info["exp_min"] / 60.0
+        fwhm = 2.3548 * sigma_px * scale
+        res["trail_arcsec"] = round(trail, 2) if np.isfinite(trail) else float("nan")
+        faint_fn = gaia_faint_fn or (gaia_faint_cone if gaia_fn is gaia_cone else (lambda *a_: np.zeros((0, 6))))
+        why_not = ""
+        if magnitudes.trail_too_long(trail, fwhm):
+            why_not = "trailed image: the object moved %.1f\" during the exposure, more than %.1f star width" % (
+                trail, magnitudes.TRAIL_LIMIT_FWHM)
+        else:
+            try:  # the Gaia sources fainter than G 21 count too for the calibration stars' isolation
+                gall = np.vstack([gep, gaia_at_epoch(faint_fn(ra0, dec0, size_deg * 0.75), year)])
+            except Exception as e:  # noqa
+                why_not = "the Gaia query for faint sources failed (%s)" % str(e)[:120]
+        if why_not:
+            res["mag_note"] = why_not
+            for c in cands:
+                c.update(band=band, band_mag=float("nan"), rms_mag=float("nan"), mag_note=why_not)
+        else:
+            cra, cdec = apply_astrometry(fit, det_cal[:, 0], det_cal[:, 1])
+            cxi, ceta = tangent(cra, cdec, ra0, dec0)
+            gxi, geta = tangent(gall[:, 0], gall[:, 1], ra0, dec0)
+            inst_s, cat_s, why = magnitudes.calibration_stars(cxi, ceta, det_cal[:, 9], det_cal[:, 2], gxi, geta,
+                                                              gall[:, 2], gall[:, 4], gall[:, 3], band)
+            res["mag_calibration_stars"] = int(len(inst_s)); res["mag_stars_set_aside"] = why
+            amp_noise = forced_noise(r_img, det_cal, sigma_px, np.random.default_rng(54321))
+            res["mag_peak_noise"] = round(amp_noise, 2) if np.isfinite(amp_noise) else float("nan")
+            for c in cands:
+                c.update(magnitudes.candidate_mag(inst_s, cat_s, c["amp_fit"], amp_noise, band, c.get("amp_one_source")))
     good = sorted([c for c in cands if not c["rejected"]], key=lambda c: c["dist_sigma"])
     inside = [c for c in good if c["dist_sigma"] <= 3.0]
     # a known object rejected inside the prediction's 3-sigma region: the target could be among them
@@ -1720,7 +1798,10 @@ def measure_one(cfg, out, pl, gaia_fn=gaia_cone, show=True, known_fn=None):
         b = inside[0]
         res.update(best_ra=b["ra"], best_dec=b["dec"], best_dra=b["dra_arcsec"], best_ddec=b["ddec_arcsec"],
                    best_mag=b["mag_g_scale"], best_snr=b["snr"], best_sig_ra=b["sig_ra_arcsec"],
-                   best_sig_dec=b["sig_dec_arcsec"], best_dist_sigma=b["dist_sigma"], best_note=b["note"])
+                   best_sig_dec=b["sig_dec_arcsec"], best_dist_sigma=b["dist_sigma"], best_note=b["note"],
+                   best_band=b.get("band"), best_band_mag=b.get("band_mag", float("nan")),
+                   best_rms_mag=b.get("rms_mag", float("nan")),
+                   best_blend=b["blend"]["neighbors_arcsec"] if "blend" in b else None)
         res["result"] = "unique candidate within 3 sigma"
         if b.get("known_uncertain"):
             res["flag"] = (res["flag"] + "; " if res["flag"] else "") + \
@@ -1784,6 +1865,9 @@ def step_measure(cfg, out):
     if os.path.exists(st) and not open(st).read().startswith("COMPLETE"):
         raise FetchIncomplete("the last --fetch of this subject did not finish, or the plan is newer (%s); run --fetch "
                               "first" % st)
+    for fn in os.listdir(out):  # a report made from earlier results must not stay next to the new ones
+        if fn.startswith("report_") and fn.endswith(".psv"):
+            os.remove(os.path.join(out, fn))
     rows = []; allc = {}
     for pl in plan:
         try:
@@ -1794,20 +1878,53 @@ def step_measure(cfg, out):
         log("  %-26s %s  refs %s rms %s\"  in box %s, not rejected %s, within 3 sigma %s: %s%s" % (
             r["plate"], r.get("mid", "")[:16], r.get("n_ref"), r.get("rms_arcsec"), r.get("n_in_box"),
             r.get("n_candidates"), r.get("n_within_3sigma"), r.get("result", r.get("status")),
-            (" -> %+.2f\" %+.2f\" (+-%.2f\", %.2f\") mag %.1f, %.1f sigma" % (
-                r["best_dra"], r["best_ddec"], r["best_sig_ra"], r["best_sig_dec"], r["best_mag"], r["best_dist_sigma"]))
+            (" -> %+.2f\" %+.2f\" (+-%.2f\", %.2f\") mag %.1f, %.1f sigma%s" % (
+                r["best_dra"], r["best_ddec"], r["best_sig_ra"], r["best_sig_dec"], r["best_mag"], r["best_dist_sigma"],
+                (", %s %.2f +- %.1f" % (r["best_band"], r["best_band_mag"], r["best_rms_mag"]))
+                if r.get("best_band") and np.isfinite(r.get("best_band_mag", float("nan"))) else ""))
             if "best_dra" in r else ""))
     write_json(os.path.join(out, "results.json"), dict(version=VERSION, subject=cfg["designation"], plates=rows, candidates=allc))
     keys = ["plate", "mid", "exp_min", "site", "mpc", "V", "pred_ra", "pred_dec", "ra3", "dec3", "smaa", "smia", "theta",
             "n_ref", "rms_arcsec", "n_in_box", "n_candidates", "n_within_3sigma", "result", "best_ra", "best_dec",
             "best_dra", "best_ddec", "best_sig_ra", "best_sig_dec", "best_dist_sigma", "best_mag", "best_snr",
-            "best_note", "known_objects_in_box", "comparison_dates", "status", "reportable", "flag", "time_note",
+            "best_band", "best_band_mag", "best_rms_mag", "best_note", "known_objects_in_box", "comparison_dates", "status", "reportable", "flag", "time_note",
             "header_dateobs"]
     with open(os.path.join(out, "results.csv"), "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore"); w.writeheader()
         for r in rows:
             w.writerow(r)
     log("-> results.csv, results.json, pictures/")
+
+def step_report(out, settings):
+    """the report file for the MPC from results.json: report_<folder>.psv in the output folder"""
+    res = json.load(open(os.path.join(out, "results.json")))
+    rows = res["plates"]
+    target = next((r.get("target_name") for r in rows if r.get("target_name")), "")
+    path = os.path.join(out, "report_%s.psv" % safe_name(os.path.basename(os.path.normpath(out))))
+    for fn in os.listdir(out):  # a report from an earlier run must not stay next to new results
+        if fn.startswith("report_") and fn.endswith(".psv"):
+            os.remove(os.path.join(out, fn))
+    try:
+        rep = mpc_report.write_report(rows, target, settings, VERSION, path)
+    except ValueError as e:  # SettingsError included
+        log("-> no report: %s" % e)
+        return None
+    for plate, why in rep["held_back"]:
+        log("  report: %s held back (%s)" % (plate, why))
+    for plate in rep["no_mag"]:
+        log("  report: %s written without a magnitude (see results.json)" % plate)
+    st, txt = rep["validation"]
+    if rep["path"] is None and st != "failed":
+        log("-> no report: no night with two or more reportable positions")
+        return rep
+    if st == "failed":
+        log("-> REPORT FAILED VALIDATION, kept as %s for inspection; do not submit it:\n%s" % (
+            os.path.basename(rep["invalid_path"]), txt))
+        return rep
+    log("-> %s: %d positions (%s); validation: %s" % (os.path.basename(path), len(rep["written"]),
+                                                     ", ".join(rep["written"]), st))
+    return rep
+
 
 # --------------------------------------------------------------------------------------------- self-test
 
@@ -2595,6 +2712,250 @@ def self_test():
         ps = float(np.std(pulls)); pm = float(np.mean(pulls))
         check(0.7 < ps < 1.4 and abs(pm) < 0.3, "error bars (correlated noise): %d of %d faint objects found; median error "
               "%.2f\"; pulls mean %+.2f, sd %.2f (want 0, 0.7-1.4)" % (len(errs), 3 * len(picks), float(np.median(errs)), pm, ps))
+    # ---------------- 5. magnitudes on POSS-I plates, and the report file for the MPC
+    x_ = np.array([1.0, 4.5, -0.3])
+    rc_ = magnitudes.catalog_mag(np.full(3, 18.0), x_, "Rc"); bj_ = magnitudes.catalog_mag(np.full(3, 18.0), x_, "Bj")
+    check(abs(rc_[0] - 17.761135) < 1e-6 and abs(bj_[0] - 18.972201) < 1e-6 and np.isnan(rc_[1]) and np.isnan(bj_[1])
+          and np.isnan(rc_[2]) and np.isfinite(bj_[2]),
+          "Gaia G and BP-RP to Rc and Bj (Gaia DR3 documentation, Table 5.9); nothing outside each relation's color range")
+    pb = [magnitudes.plate_band(hdr(REGION=r_, TELESCOP=t_)) for r_, t_ in (
+        ("XE733", "Palomar Schmidt"), ("XO733", "Palomar Schmidt"), ("S789", "UK Schmidt - Doubl"), ("XP564", "Oschin Schmidt - D"))]
+    check(pb == ["Rc", "Bj", None, None], "band from the plate: Rc on red POSS-I plates, Bj on blue ones, none on others (%s)" % pb)
+    check(res.get("band") is None and not any("band_mag" in c for c in cands), "no magnitudes on plates that are not POSS-I")
+
+    def phot_scene(region, band, label, extra=False):
+        """a POSS-I plate with Gaia stars of known color, seen through a photographic response (slope 0.85), an
+        object of known magnitude in clear sky, and a second one 6.8" from a fixed source as bright (one fitted
+        jointly with it)"""
+        hP = make_header(ra_c, dec_c); hP["REGION"] = region; hP["PLATEID"] = "PH"; hP["PLTLABEL"] = label
+        n_ = 160
+        sra = ra_c + rng.uniform(-0.06, 0.06, n_) / math.cos(math.radians(dec_c)); sdec = dec_c + rng.uniform(-0.06, 0.06, n_)
+        sg = rng.uniform(15.5, 19.8, n_); sx = rng.uniform(0.3, 1.6, n_)
+        sx[:8] = 4.5  # outside both relations' color range: never calibration stars
+        cat6 = np.column_stack([sra, sdec, rng.normal(0, 15, n_), rng.normal(0, 15, n_), sg, sx])
+        epP = gaia_at_epoch(cat6, 1954.2)
+        mcat = magnitudes.catalog_mag(sg, np.where(sx > 4.0, 1.0, sx), band)
+        sxi, seta = tangent(epP[:, 0], epP[:, 1], pra, pdec)
+        spots = []
+
+        def free(r_):
+            for a_ in np.arange(-70, 71, 7.0):
+                for b_ in np.arange(-70, 71, 7.0):
+                    if np.min(np.hypot(sxi - a_, seta - b_)) > r_ and all(math.hypot(a_ - u[0], b_ - u[1]) > 30 for u in spots):
+                        spots.append((a_, b_)); return a_, b_
+            raise RuntimeError("self-test: no clear spot")
+        P1 = free(15.0); P2 = free(15.0); B2 = (P2[0] + 6.8, P2[1])
+        m1, m2 = 18.6, 18.9
+        mr = lambda m: 16.0 + 0.85 * (np.asarray(m) - 16.0)  # noqa: E731
+        o1, o2, b2 = sky(P1), sky(P2), sky(B2)
+        imgP = render(hP, np.r_[epP[:, 0], o1[0], o2[0], b2[0]], np.r_[epP[:, 1], o1[1], o2[1], b2[1]],
+                      np.r_[mr(mcat), mr(m1), mr(m2), mr(m2)])
+        outP = subject_paths(tmp, "selftest_phot_" + band)
+        fits.PrimaryHDU(imgP, hP).writeto(os.path.join(outP, "cutouts", "poss1_red_%s_PH__target.fits" % region), overwrite=True)
+        plP = dict(survey="poss1_red", plate="%s_PH" % region, pred_ra=pra, pred_dec=pdec, V=18.6, ra3=400.0, dec3=400.0,
+                   smaa=400.0, smia=400.0, theta=0.0, rate=1.0, mid=plate_info(hP)["mid"].isoformat())
+        cfgP = dict(cfg, check_known=False)
+        rP, cP = measure_one(cfgP, outP, plP, gaia_fn=lambda ra, dec, r: cat6, show=False)
+
+        def near_(cs, s_):
+            return ([c for c in cs if math.hypot(c["dra_arcsec"] - s_[0], c["ddec_arcsec"] - s_[1]) < 2.5] or [None])[0]
+        more = {}
+        if extra:
+            # a fast object: 8"/h over 45 min is a 6" trail, longer than half a star width (3.7"): no magnitude
+            rT, cT = measure_one(cfgP, outP, dict(plP, rate=8.0), gaia_fn=lambda ra, dec, r: cat6, show=False)
+            more["trailed"] = (rT, near_(cT, P1))
+            # a Gaia source fainter than G 21 (gaia_cone leaves those out) 5" from the most isolated usable star
+            ok_ = (sx < 4.0) & (sg > 16.0) & (sg < 18.0) & (np.abs(sxi) < 150.0) & (np.abs(seta) < 150.0)
+            dn = [np.min(np.hypot(sxi[j] - np.delete(sxi, j), seta[j] - np.delete(seta, j))) if ok_[j] else 0.0 for j in range(n_)]
+            j0 = int(np.argmax(dn))
+            fr, fd = untangent(sxi[j0] + 5.0, seta[j0], pra, pdec)
+            faint = np.array([[float(fr), float(fd), np.nan, np.nan, 21.5, np.nan]])
+            rF, _ = measure_one(cfgP, outP, plP, gaia_fn=lambda ra, dec, r: cat6, show=False, gaia_faint_fn=lambda *a_: faint)
+            more["faint"] = (rF, dn[j0])
+        return rP, near_(cP, P1), near_(cP, P2), m1, m2, more
+    for region_, band_, label_ in (("XE733", "Rc", "E1029"), ("XO733", "Bj", "O1029")):
+        rP, c1, c2, m1, m2, more = phot_scene(region_, band_, label_, extra=(band_ == "Rc"))
+        why_ = rP.get("mag_stars_set_aside", {})
+        check(rP.get("band") == band_ and rP.get("mag_calibration_stars", 0) >= 30 and why_.get("color_range", 0) >= 1
+              and why_.get("crowded", 0) >= 1,
+              "%s plate: %s calibration stars; set aside: %s" % (band_, rP.get("mag_calibration_stars"), why_))
+        e1 = (c1["band_mag"] - m1) if c1 and np.isfinite(c1.get("band_mag", float("nan"))) else float("nan")
+        check(c1 is not None and c1.get("band") == band_ and abs(e1) <= min(0.12, 3.0 * c1["band_mag_err"])
+              and c1["rms_mag"] >= c1["band_mag_err"] and abs(c1["rms_mag"] * 10 - round(c1["rms_mag"] * 10)) < 1e-6,
+              "%s plate: object of %.1f measured %.2f (error %.2f, rmsMag %s)" % (
+                  band_, m1, c1["band_mag"] if c1 else float("nan"), c1.get("band_mag_err", float("nan")) if c1 else float("nan"),
+                  c1.get("rms_mag") if c1 else None))
+        e2 = (c2["band_mag"] - m2) if c2 and np.isfinite(c2.get("band_mag", float("nan"))) else float("nan")
+        check(c2 is not None and "blend" in c2 and c2["mag_calibration"]["deblend"] > 0
+              and abs(e2) <= min(0.4, 3.0 * c2["band_mag_err"]),
+              "%s plate: object of %.1f 6.8\" from a source as bright, fitted jointly: %.2f (error %.2f, deblending part %s)" % (
+                  band_, m2, c2["band_mag"] if c2 else float("nan"), c2.get("band_mag_err", float("nan")) if c2 else float("nan"),
+                  c2.get("mag_calibration", {}).get("deblend") if c2 else None))
+        if "trailed" in more:
+            rT, cT = more["trailed"]
+            check(cT is not None and not np.isfinite(cT.get("band_mag", 0.0)) and "trailed" in cT.get("mag_note", "")
+                  and "trailed" in rT.get("mag_note", ""), "a 6\" trail (half a star width is 1.9\") gets no magnitude (%s)"
+                  % (cT.get("mag_note") if cT else "object not found"))
+        if "faint" in more:
+            rF, dnear = more["faint"]
+            wF = rF.get("mag_stars_set_aside", {})
+            check(wF.get("crowded", 0) == why_.get("crowded", 0) + 1
+                  and rF.get("mag_calibration_stars", 0) == rP.get("mag_calibration_stars", 0) - 1,
+                  "a Gaia source fainter than G 21, 5\" from a calibration star (nearest other star %.0f\"), sets that star "
+                  "aside (%s -> %s calibration stars)" % (dnear, rP.get("mag_calibration_stars"), rF.get("mag_calibration_stars")))
+    # the calibration rules on their own: star selection, the window, the slope, the error terms
+    dxy = [(0, 0), (100, 0), (0, 100), (100, 100), (106, 100), (-100, 0), (-100, -100), (0, -100), (200, 200)]
+    gsrc = [(0.5, 0, 17, 1.0, 1), (102, 0, 17, 1.0, 1), (0, 100.3, 17, 1.0, 1), (6, 100, 17, 1.0, 1), (100, 100.2, 17, 1.0, 1),
+            (-100, 0.2, 17, 1.0, 0), (-100, -100.2, 17, np.nan, 1), (0.2, -100, 17, 4.5, 1), (200.1, 200, 17, 1.0, 1),
+            (205, 200, 21.5, np.nan, 1)]
+    G_ = np.array(gsrc, float)
+    idx_, cat0_, why0_ = magnitudes.select_stars(np.array([p_[0] for p_ in dxy], float), np.array([p_[1] for p_ in dxy], float),
+                                                 G_[:, 0], G_[:, 1], G_[:, 2], G_[:, 3], G_[:, 4], "Rc")
+    check(list(idx_) == [0] and why0_ == dict(not_matched=2, crowded=3, no_color_or_pm=2, color_range=1),
+          "calibration stars: matched within 1.5\", no other Gaia source or detection within 10\" (a G 21.5 one too), "
+          "proper motion and color in range (kept %s; set aside %s)" % (list(idx_), why0_))
+    rng3 = np.random.default_rng(5)
+    catc = rng3.uniform(14.0, 21.0, 300)
+    resp = lambda m: -10.0 + (m - 18.0) - 0.15 * (m - 18.0) ** 2  # noqa: E731  (a curved photographic response)
+    instc = resp(catc) + rng3.normal(0.0, 0.03, 300)
+    cc_ = magnitudes.calibrate(instc, catc, resp(17.0))
+    catl = np.r_[rng3.uniform(14.0, 17.6, 120), rng3.uniform(17.6, 21.0, 6)]
+    instl = 0.7 * (catl - 18.0) - 10.0 + rng3.normal(0.0, 0.02, len(catl))
+    cl_ = magnitudes.calibrate(instl, catl, 0.7 * (17.5 - 18.0) - 10.0)
+    catf = np.r_[rng3.uniform(14.0, 16.5, 40), [18.4, 18.6, 18.8, 19.0, 19.2, 19.4]]
+    cf_, wf_ = magnitudes.calibrate(catf - 28.0, catf, 18.9 - 28.0), magnitudes.calibration_problem(catf - 28.0, catf, 18.9 - 28.0)
+    check(cc_ is not None and abs(cc_["mag"] - 17.0) < 0.08 and cl_ is not None and abs(cl_["mag"] - 17.5) < 0.05
+          and cf_ is None and "within 1 mag" in wf_,
+          "calibration: a curved response is followed within 1 mag (%.3f), the slope is fitted (%.3f), and with fewer than "
+          "8 stars within 1 mag there is no magnitude (%s)" % (cc_["mag"] - 17.0 if cc_ else float("nan"),
+                                                             cl_["mag"] - 17.5 if cl_ else float("nan"), wf_))
+    cat_e = np.linspace(17.0, 19.0, 41); inst_e = (cat_e - 25.0) / 1.2 + 0.03 * np.sin(np.arange(41) * 1.7)
+    amp_e = 10.0 ** (-((18.0 - 25.0) / 1.2) / 2.5)
+    o_ = magnitudes.candidate_mag(inst_e, cat_e, amp_e, 0.08 * amp_e, "Rc", amp_one_source=1.25 * amp_e)
+    cal_e = magnitudes.calibrate(inst_e, cat_e, -2.5 * math.log10(amp_e))
+    w_n = cal_e["a"] * 2.5 / math.log(10.0) * 0.08; w_d = 0.5 * cal_e["a"] * 2.5 * math.log10(1.25)
+    w_t = math.sqrt(cal_e["scatter"] ** 2 + w_n ** 2 + w_d ** 2)
+    check(abs(o_["band_mag_err"] - w_t) < 1e-9 and o_["rms_mag"] == math.ceil(w_t * 10 - 1e-6) / 10.0
+          and abs(o_["mag_calibration"]["noise"] - round(w_n, 3)) < 1e-9 and abs(o_["mag_calibration"]["deblend"] - round(w_d, 3)) < 1e-9,
+          "rmsMag: scatter %.3f, noise %.3f (slope x 1.086 x peak noise / peak), deblending %.3f (half the joint/one-source "
+          "change), combined %.3f, rounded up to %s" % (cal_e["scatter"], w_n, w_d, w_t, o_["rms_mag"]))
+    # the settings for the report's header
+    S_ok = dict(submitter="B. C. Tester", measurers=["B. C. Tester"],
+                telescope=dict(name="Palomar 48-inch (1.2-m) Schmidt", aperture="1.2", design="Schmidt", detector="PHO"))
+    bads = [("a prog key", dict(S_ok, prog="0a")),
+            ("a prog key inside", dict(S_ok, observatory_names={"261": "Palomar Mountain-DSS", "PROG": "0a"})),
+            ("an email address", dict(S_ok, submitter="observer@example.org")), ("an unknown key", dict(S_ok, program="0a")),
+            ("a comment line over 100 characters", dict(S_ok, comment_lines=["x" * 101])), ("no measurers", dict(S_ok, measurers=[])),
+            ("a line break in a name", dict(S_ok, measurers=["B. C. Tester\n# observatory\n! mpcCode 999"])),
+            ("a '|' in a name", dict(S_ok, submitter="B. C. | Tester")), ("an empty comment line", dict(S_ok, comment_lines=["  "])),
+            ("the example's placeholder name", dict(S_ok, submitter="A. N. Observer"))]
+    refused = []
+    for what, s_ in bads:
+        try:
+            mpc_report.check_settings(s_)
+        except mpc_report.SettingsError as e:
+            if "prog" not in what or "no 'prog'" in str(e):  # a prog key is refused as such, not for another reason
+                refused.append(what)
+    check(len(refused) == len(bads), "settings refused: %s" % ", ".join(refused))
+    try:
+        mpc_report.read_settings(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ades_settings.example.json"))
+        ex_why = "accepted"
+    except mpc_report.SettingsError as e:
+        ex_why = str(e)
+    check("placeholder" in ex_why, "the example settings file is refused until its names are filled in (%s)" % ex_why[:70])
+    ids = [mpc_report.object_ids(t_) for t_ in ("120178 (2003 OP32)", "50000 Quaoar (2002 LM60)", "(2026 ED138)", "2003 OP32",
+                                                "2040 P-L")]
+    check(ids == [("120178", "2003 OP32", "(120178) 2003 OP32"), ("50000", "2002 LM60", "(50000) Quaoar"), ("", "2026 ED138", "2026 ED138"),
+                  ("", "2003 OP32", "2003 OP32"), ("", "2040 P-L", "2040 P-L")],
+          "permID and provID from Horizons' target names (%s)" % ids)
+    rt_ = [mpc_report.rms_time(dict(region=r_, clock_sigma_min=s_, clock_min=t_)) for r_, s_, t_ in (
+        ("XE564", 0.42, -0.04), ("XO564", 0.42, -0.04), ("XO587", 0.30, -7.73), ("XE889", 0.6, -0.8), ("XE1", 0.0, 0.0))]
+    check(rt_ == [30, 60, 470, 40, None], "rmsTime: red, the clock's uncertainty; blue, at least 60 s and the red plate's correction (%s)" % rt_)
+
+    def prow(plate, mid, ra, dec, region, label, mag, rep=True):
+        return dict(plate=plate, status="ok", reportable=rep, mpc="261", mid=mid, best_ra=ra, best_dec=dec, best_sig_ra=0.21,
+                    best_sig_dec=0.16, best_band="Rc" if region.startswith("XE") else "Bj", best_band_mag=mag,
+                    best_rms_mag=0.3 if mag is not None else None, region=region, label=label, emulsion="",
+                    exp_min=45.0 if region.startswith("XE") else 12.0, clock_sigma_min=0.42, clock_min=-0.04,
+                    clock_source="Hill 2026 per-plate value", target_name="123456 (2001 AB12)", best_blend=None)
+    rows_ = [prow("poss1_red_XE733_A", "1954-04-03T06:11:06.400000", 169.479091, -10.803498, "XE733", "E1029", 18.31),
+             prow("poss1_blue_XO733_B", "1954-04-03T06:44:12.000000", 169.478716, -10.80338, "XO733", "O1029", None),
+             prow("poss1_red_XE734_C", "1955-01-10T08:00:00", 170.1, -10.5, "XE734", "E1300", 18.5),
+             prow("poss1_red_XE735_D", "1954-04-03T07:30:00", 169.6, -10.9, "XE735", "E1030", 18.4, rep=False)]
+    ot_ = [mpc_report.obs_time(t_) for t_ in ("1954-05-25T07:46:27.660000", "1954-05-25T07:46:27.400000",
+                                               "1954-12-31T23:59:59.600000")]
+    check(ot_ == ["1954-05-25T07:46:28Z", "1954-05-25T07:46:27Z", "1955-01-01T00:00:00Z"], "obsTime rounded to the second (%s)" % ot_)
+    two_nights = [prow("poss1_red_XE740_G", "1954-12-20T13:40:00", 170.0, -10.0, "XE740", "E1301", 18.0),
+                  prow("poss1_blue_XO741_H", "1954-12-21T01:30:00", 170.1, -10.1, "XO741", "O1302", 18.0)]
+    kn_, hn_ = mpc_report.select_rows(two_nights)
+    check(not kn_ and len(hn_) == 2, "positions 11.8 h apart on two Palomar nights are two single positions, held back")
+    try:
+        mpc_report.write_report([dict(rows_[0], label="E1@29"), rows_[1]], "123456 (2001 AB12)", S_ok, VERSION,
+                                os.path.join(tmp, "report_at.psv")); guard_ = "written"
+    except ValueError:
+        guard_ = "refused"
+    check(guard_ == "refused" and not os.path.exists(os.path.join(tmp, "report_at.psv")),
+          "a report that would carry an email-like '@' is not written")
+    rp_ = os.path.join(tmp, "report_test.psv")
+    w_ = mpc_report.write_report(rows_, "123456 (2001 AB12)", S_ok, VERSION, rp_)
+    check(w_["written"] == ["poss1_red_XE733_A", "poss1_blue_XO733_B"] and [p_ for p_, _ in w_["held_back"]] == ["poss1_red_XE734_C"]
+          and w_["no_mag"] == ["poss1_blue_XO733_B"],
+          "report: a night with two positions is written, a single position held back, a plate not reportable left out")
+    head_, back_ = mpc_report.read_psv(rp_)
+    txt_ = open(rp_).read()
+    want_ = [dict(permID="123456", provID="2001 AB12", mode="PHO", stn="261", obsTime="1954-04-03T06:11:06Z", ra="169.479091",
+                  dec="-10.803498", rmsRA="0.21", rmsDec="0.16", mag="18.3", rmsMag="0.3", band="Rc", photCat="Gaia3",
+                  rmsTime="30", astCat="Gaia3", remarks="POSS-I E1029 (DSS XE733), 103aE, 45 min"),
+             dict(permID="123456", provID="2001 AB12", mode="PHO", stn="261", obsTime="1954-04-03T06:44:12Z", ra="169.478716",
+                  dec="-10.803380", rmsRA="0.21", rmsDec="0.16", mag="", rmsMag="", band="", photCat="", rmsTime="60",
+                  astCat="Gaia3", remarks="POSS-I O1029 (DSS XO733), 103aO, 12 min")]
+    check(back_ == want_, "report read back: the values written (%s)" % [r_ for r_ in back_ if r_ not in want_])
+    lines_ = txt_.splitlines()
+    check(not any(k_.lower() == "prog" for k_ in (back_[0] if back_ else {})) and "@" not in txt_
+          and all(len(l_) <= 100 for l_ in lines_ if l_.startswith("! line"))
+          and lines_[:6] == ["# version=2022", "# observatory", "! mpcCode 261", "! name Palomar Mountain-DSS", "# submitter",
+                             "! name B. C. Tester"],
+          "report: no prog column, no email, comment lines within 100 characters, header blocks in order")
+    # what the trail mode uses: any instrumental scale, extra error terms, a blue plate's own clock, rmsCorr, pairs
+    rng2 = np.random.default_rng(11)
+    cat_ = rng2.uniform(16.0, 20.0, 60); inst_ = 0.85 * cat_ - 25.0 + rng2.normal(0.0, 0.05, 60)
+    ca_ = magnitudes.calibrate(inst_, cat_, 0.85 * 18.6 - 25.0); cb_ = magnitudes.calibrate(inst_ + 3.0, cat_, 0.85 * 18.6 - 22.0)
+    e_, r_, _ = magnitudes.rms_mag(0.12, dict(noise=0.10, trail=0.05))
+    check(ca_ is not None and cb_ is not None and abs(ca_["mag"] - 18.6) < 0.05 and abs(ca_["mag"] - cb_["mag"]) < 1e-9
+          and abs(e_ - math.sqrt(0.12 ** 2 + 0.10 ** 2 + 0.05 ** 2)) < 1e-12 and r_ == 0.2
+          and np.isnan(magnitudes.rms_mag(0.1, dict(noise=float("nan")))[1]),
+          "calibration takes any instrumental scale; rmsMag takes extra terms and is nan if one is missing")
+    rt2 = mpc_report.rms_time(dict(region="XO587", clock_sigma_min=0.4, clock_min=0.0, clock_from_partner=False))
+    check(rt2 == 30, "rmsTime: a blue plate with a clock of its own gets its own uncertainty (%s s)" % rt2)
+    rows_c = [dict(rows_[0], best_rms_corr=0.25), dict(rows_[1]),
+              dict(rows_[0], plate="poss1_red_XE736_E", mid="1954-04-04T06:11:06", region="XE736", label="E1031"),
+              dict(rows_[0], plate="poss1_red_XE737_F", mid="1954-04-04T07:11:06", region="XE737", label="E1032")]
+    rcp_ = os.path.join(tmp, "report_corr.psv")
+    w2_ = mpc_report.write_report(rows_c, "123456 (2001 AB12)", S_ok, VERSION, rcp_, require_pair=True)
+    _, b2_ = mpc_report.read_psv(rcp_)
+    check(w2_["written"] == ["poss1_red_XE733_A", "poss1_blue_XO733_B"]
+          and sorted(p_ for p_, _ in w2_["held_back"]) == ["poss1_red_XE736_E", "poss1_red_XE737_F"]
+          and len(b2_) == 2 and b2_[0].get("rmsCorr") == "0.250" and b2_[1].get("rmsCorr") == ""
+          and w2_["validation"][0] in ("ok", "not installed"),
+          "report with pairs required: a night of two red plates held back; rmsCorr written when given (validation %s)"
+          % w2_["validation"][0])
+    st_, vt_ = w_["validation"]
+    if st_ == "not installed":
+        log("  note iau-ades not installed: the report's validation against the MPC schema was not tested")
+    else:
+        bad_ = os.path.join(tmp, "report_prog.psv")
+        with open(bad_, "w") as f:
+            f.write("\n".join(("prog|" + l_) if l_.startswith("permID") else (("0a  |" + l_) if l_.startswith("123456") else l_)
+                              for l_ in lines_) + "\n")
+        check(st_ == "ok" and mpc_report.validate(bad_)[0] == "failed",
+              "report: passes the MPC submission schema (iau-ades); the same file with a prog column fails (%s)" % vt_[:40])
+        pv_ = os.path.join(tmp, "report_band.psv")
+        wv_ = mpc_report.write_report([dict(rows_[0], best_rms_mag=0.0), dict(rows_[1], best_band="Bj", best_band_mag=19.0,
+                                                                               best_rms_mag=0.3)],
+                                      "123456 (2001 AB12)", S_ok, VERSION, pv_)
+        check(wv_["path"] is None and not os.path.exists(pv_) and wv_["invalid_path"] and os.path.exists(wv_["invalid_path"])
+              and "rmsMag" in wv_["validation"][1],
+              "report: a file that fails the schema is kept only as .invalid.psv, with the validator's reason")
     log("SELF-TEST " + ("PASSED" if ok else "FAILED"))
     return ok
 
@@ -2644,6 +3005,9 @@ def main():
     ap.add_argument("--fetch", action="store_true", help="only download the cutouts")
     ap.add_argument("--measure", action="store_true", help="only measure the downloaded cutouts")
     ap.add_argument("--self-test", action="store_true", help="run the offline self-test")
+    ap.add_argument("--ades", metavar="SETTINGS", help="after measuring, write the report file for the Minor Planet "
+                    "Center (ADES PSV) with the reportable positions; SETTINGS is a JSON file with the names for its "
+                    "header (see ades_settings.example.json)")
     ap.add_argument("--probe", nargs=2, type=float, metavar=("RA", "DEC"),
                     help="ask every survey which plate covers RA DEC (deg) and print its date; checks the DSS link")
     ap.add_argument("--root", default=os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")),
@@ -2651,6 +3015,14 @@ def main():
     a = ap.parse_args()
     if a.self_test:
         sys.exit(0 if self_test() else 1)
+    settings = None
+    if a.ades:
+        if (a.plan or a.fetch) and not a.measure:
+            ap.error("--ades goes with --measure or a whole run")
+        try:
+            settings = mpc_report.read_settings(a.ades)
+        except mpc_report.SettingsError as e:
+            ap.error(str(e))
     missing = [table_path(n) for n in HILL_TABLES if not os.path.exists(table_path(n))]
     if missing:
         sys.exit("D. Hill's POSS-I tables are missing (they ship with this tool in targets/precovery/): %s"
@@ -2710,6 +3082,8 @@ def main():
             step_fetch(cfg, out)
         if a.measure or every:
             step_measure(cfg, out)
+            if settings is not None:
+                step_report(out, settings)
     except PlanIncomplete as e:
         log("STOPPED: %s" % e)
         sys.exit(3)

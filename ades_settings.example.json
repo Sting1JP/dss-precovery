@@ -1,0 +1,6 @@
+{
+  "submitter": "A. N. Observer",
+  "measurers": ["A. N. Observer"],
+  "telescope": {"name": "Palomar 48-inch (1.2-m) Schmidt", "aperture": "1.2", "design": "Schmidt", "detector": "PHO"},
+  "comment_lines": []
+}

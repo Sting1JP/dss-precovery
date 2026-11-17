@@ -10,7 +10,7 @@ Each test runs the tool on an object whose old positions are already well known 
 
 The scorer also prints how many other candidates are in the search box (C6), and the rms and largest value of the residuals divided by their errors (C7).
 
-## Results with version 1.1.0
+## Results with version 1.2.0
 
 | Test | Plates with the object | Result |
 |---|---|---|
@@ -18,7 +18,7 @@ The scorer also prints how many other candidates are in the search box (C6), and
 | Quaoar on UK Schmidt plates, 1975-2000 (`quaoar_ukst`) | 2: 1982 Jul 17, 1994 Apr 20 | PASS; 0.05-0.55"; mid-exposure time confirmed on 1 plate |
 | Eris on UK Schmidt plates, 1976-2000 (`eris_ukst`) | 2: 1982 Sep 19, 1989 Sep 29 | PASS; 0.20-0.25"; mid-exposure time confirmed on both |
 
-Run on 31 Oct 2026 on macOS with Python 3.9.6, numpy 1.26.4, scipy 1.13.1, astropy 6.0.1 and Pillow 11.3.0. The positions are the same as with version 1.0.0.
+Run on 17 Nov 2026 on macOS with Python 3.9.6, numpy 1.26.4, scipy 1.13.1, astropy 6.0.1 and Pillow 11.3.0. The positions, their errors and the verdicts are the same as with version 1.1.0. On the POSS-I plates the results now also give magnitudes (Rc on the red plates, Bj on the blue ones); they are not scored.
 
 Each folder here holds one run: `plan.json`, `results.json`, `results.csv` and the scorer's output, `score.txt`. The DSS images are not included. The four POSS-I positions of Quaoar are marked reportable; UK Schmidt positions never are.
 

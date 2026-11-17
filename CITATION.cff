@@ -2,9 +2,9 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "dss-precovery: Precovery of Known Distant Solar System Objects on Digitized Sky Survey Plates"
-version: 1.1.0
-doi: 10.5281/zenodo.23833587
-date-released: 2026-10-31
+version: 1.2.0
+doi: 10.5281/zenodo.24309794
+date-released: 2026-11-17
 authors:
   - family-names: Stinga
     given-names: Stefano Ivan
@@ -18,7 +18,8 @@ abstract: >-
   photographic plates (POSS-I and UK Schmidt) and measures its positions. It finds the plates taken while the
   object was on them, refits each plate's astrometry to Gaia DR3, searches the JPL Horizons uncertainty region,
   rejects stars, plate flaws, known asteroids and comets (SkyBoT) and sources seen on plates from other dates
-  (POSS-II included), and fits blended neighbors jointly. It includes an offline self-test, three known-answer tests (Quaoar and Eris)
+  (POSS-II included), and fits blended neighbors jointly. On POSS-I plates it measures magnitudes (Cousins R,
+  Johnson B) calibrated on Gaia DR3, and it can write the report file for the Minor Planet Center (ADES PSV). It includes an offline self-test, three known-answer tests (Quaoar and Eris)
   with their results, and D. Hill's POSS-I plate dates and clock corrections (CC BY 4.0).
 keywords:
   - precovery
@@ -31,6 +32,9 @@ keywords:
   - Gaia DR3
   - JPL Horizons
   - SkyBoT
+  - photometry
+  - ADES
+  - Minor Planet Center
 references:
   - type: software
     title: "POSS Transients Re-examined: a re-analysis of the VASCO POSS-I transient results"

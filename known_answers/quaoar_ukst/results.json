@@ -1,5 +1,5 @@
 {
- "version": "1.1.0",
+ "version": "1.2.0",
  "subject": "50000 Quaoar",
  "plates": [
   {
@@ -16,11 +16,18 @@
    "theta": -5.775,
    "pred_ra": 239.922482246,
    "pred_dec": -14.070899834,
-   "flag": "",
+   "flag": "known-object check failed",
    "time_note": "UK Schmidt: header time read as MID-exposure (not marked reportable)",
    "reportable": false,
    "header_dateobs": "1994-04-20T16:41:00",
    "clock_sigma_min": null,
+   "region": "IS655",
+   "label": "I16046",
+   "emulsion": "IVN",
+   "clock_min": null,
+   "clock_source": null,
+   "clock_from_partner": null,
+   "target_name": "50000 Quaoar (2002 LM60)",
    "uncertainty_source": "Horizons 3-sigma ellipse",
    "n_det": 423,
    "n_ref": 206,
@@ -32,95 +39,8 @@
     60
    ],
    "scale_arcsec_px": 1.0082,
-   "known_objects_in_box": [],
-   "known_objects": [
-    {
-     "name": "2022 SC67",
-     "dra_arcsec": -170.84,
-     "ddec_arcsec": -274.91,
-     "V": 22.32,
-     "err_arcsec": 37.616,
-     "cls": "MB>Outer",
-     "rate_arcsec_h": [
-      -18.152,
-      17.766
-     ]
-    },
-    {
-     "name": "291183 2006 AP49",
-     "dra_arcsec": -248.99,
-     "ddec_arcsec": -240.21,
-     "V": 21.05,
-     "err_arcsec": 3.197,
-     "cls": "MB>Middle",
-     "rate_arcsec_h": [
-      -22.3754,
-      4.401
-     ]
-    },
-    {
-     "name": "2015 RU357",
-     "dra_arcsec": -315.54,
-     "ddec_arcsec": 348.17,
-     "V": 22.26,
-     "err_arcsec": 2.219,
-     "cls": "MB>Outer",
-     "rate_arcsec_h": [
-      -19.8234,
-      10.51
-     ]
-    },
-    {
-     "name": "2014 KB146",
-     "dra_arcsec": 539.04,
-     "ddec_arcsec": -126.45,
-     "V": 21.71,
-     "err_arcsec": 1.226,
-     "cls": "MB>Middle",
-     "rate_arcsec_h": [
-      -22.4056,
-      11.698
-     ]
-    },
-    {
-     "name": "2021 TJ43",
-     "dra_arcsec": 113.3,
-     "ddec_arcsec": 578.01,
-     "V": 23.46,
-     "err_arcsec": 2.657,
-     "cls": "MB>Outer",
-     "rate_arcsec_h": [
-      -21.0138,
-      8.944
-     ]
-    },
-    {
-     "name": "2007 VX354",
-     "dra_arcsec": -328.11,
-     "ddec_arcsec": -489.53,
-     "V": 22.78,
-     "err_arcsec": 2.772,
-     "cls": "MB>Outer",
-     "rate_arcsec_h": [
-      -19.4977,
-      6.412
-     ]
-    }
-   ],
-   "skybot_target": [
-    {
-     "name": "50000 Quaoar",
-     "dra_arcsec": -0.17,
-     "ddec_arcsec": 0.1,
-     "V": 18.91,
-     "err_arcsec": 1.687,
-     "cls": "KBO>Classical>Main",
-     "rate_arcsec_h": [
-      -2.366,
-      0.723
-     ]
-    }
-   ],
+   "known_objects_in_box": "check failed: SkyBoT: query status ERROR SkyBoT comet conesearch -> Bad request: Epoch 2449463.195139 not available... (status: ?) (3 tries)",
+   "band": null,
    "n_in_box": 24,
    "n_candidates": 1,
    "n_within_3sigma": 1,
@@ -146,6 +66,10 @@
    "best_sig_dec": 0.231,
    "best_dist_sigma": 2.438,
    "best_note": "",
+   "best_band": null,
+   "best_band_mag": null,
+   "best_rms_mag": null,
+   "best_blend": null,
    "result": "unique candidate within 3 sigma",
    "status": "ok"
   },
@@ -168,6 +92,13 @@
    "reportable": false,
    "header_dateobs": "1982-07-17T09:22",
    "clock_sigma_min": null,
+   "region": "S724",
+   "label": "J7905",
+   "emulsion": "IIIaJ",
+   "clock_min": null,
+   "clock_source": null,
+   "clock_from_partner": null,
+   "target_name": "50000 Quaoar (2002 LM60)",
    "uncertainty_source": "Horizons 3-sigma ellipse",
    "n_det": 271,
    "n_ref": 140,
@@ -183,13 +114,13 @@
    "known_objects": [
     {
      "name": "59996 1999 TZ",
-     "dra_arcsec": 67.72,
-     "ddec_arcsec": 22.46,
-     "V": 20.43,
-     "err_arcsec": 1.671,
+     "dra_arcsec": 67.89,
+     "ddec_arcsec": 22.42,
+     "V": 20.42,
+     "err_arcsec": 0.146,
      "cls": "MB>Middle",
      "rate_arcsec_h": [
-      7.0455,
+      7.0454,
       -4.834
      ]
     },
@@ -207,10 +138,10 @@
     },
     {
      "name": "555639 2014 BU66",
-     "dra_arcsec": 52.42,
-     "ddec_arcsec": 154.49,
+     "dra_arcsec": 52.48,
+     "ddec_arcsec": 154.47,
      "V": 22.86,
-     "err_arcsec": 7.917,
+     "err_arcsec": 7.484,
      "cls": "MB>Middle",
      "rate_arcsec_h": [
       10.3296,
@@ -243,10 +174,10 @@
     },
     {
      "name": "19671 1999 RX151",
-     "dra_arcsec": -231.95,
-     "ddec_arcsec": 257.5,
+     "dra_arcsec": -231.83,
+     "ddec_arcsec": 257.47,
      "V": 18.31,
-     "err_arcsec": 0.351,
+     "err_arcsec": 0.835,
      "cls": "MB>Outer",
      "rate_arcsec_h": [
       10.7663,
@@ -254,11 +185,11 @@
      ]
     },
     {
-     "name": "725442 2008 XM40",
-     "dra_arcsec": -364.52,
-     "ddec_arcsec": 111.4,
-     "V": 21.73,
-     "err_arcsec": 3.747,
+     "name": "725442 2008 XM46",
+     "dra_arcsec": -364.43,
+     "ddec_arcsec": 111.39,
+     "V": 21.76,
+     "err_arcsec": 1.432,
      "cls": "MB>Middle",
      "rate_arcsec_h": [
       15.7072,
@@ -327,10 +258,10 @@
     },
     {
      "name": "89351 2001 VB75",
-     "dra_arcsec": -333.47,
+     "dra_arcsec": -333.43,
      "ddec_arcsec": -295.59,
-     "V": 19.43,
-     "err_arcsec": 0.407,
+     "V": 19.44,
+     "err_arcsec": 1.021,
      "cls": "MB>Inner",
      "rate_arcsec_h": [
       13.8957,
@@ -339,10 +270,10 @@
     },
     {
      "name": "459654 2013 KY3",
-     "dra_arcsec": -244.63,
-     "ddec_arcsec": 384.38,
+     "dra_arcsec": -244.68,
+     "ddec_arcsec": 384.4,
      "V": 21.3,
-     "err_arcsec": 1.371,
+     "err_arcsec": 2.955,
      "cls": "MB>Outer",
      "rate_arcsec_h": [
       6.8117,
@@ -351,10 +282,10 @@
     },
     {
      "name": "40260 1999 CU98",
-     "dra_arcsec": 425.41,
+     "dra_arcsec": 425.43,
      "ddec_arcsec": 205.08,
      "V": 19.59,
-     "err_arcsec": 1.16,
+     "err_arcsec": 0.334,
      "cls": "MB>Middle",
      "rate_arcsec_h": [
       10.8414,
@@ -363,10 +294,10 @@
     },
     {
      "name": "488989 2005 UH382",
-     "dra_arcsec": -226.38,
-     "ddec_arcsec": 437.43,
-     "V": 21.19,
-     "err_arcsec": 0.341,
+     "dra_arcsec": -226.34,
+     "ddec_arcsec": 437.4,
+     "V": 21.18,
+     "err_arcsec": 0.2,
      "cls": "MB>Middle",
      "rate_arcsec_h": [
       6.7054,
@@ -399,10 +330,10 @@
     },
     {
      "name": "63698 2001 QK179",
-     "dra_arcsec": -269.58,
-     "ddec_arcsec": 554.7,
-     "V": 20.57,
-     "err_arcsec": 0.683,
+     "dra_arcsec": -269.5,
+     "ddec_arcsec": 554.67,
+     "V": 20.55,
+     "err_arcsec": 0.217,
      "cls": "MB>Middle",
      "rate_arcsec_h": [
       3.1295,
@@ -435,22 +366,22 @@
     },
     {
      "name": "35740 1999 GK24",
-     "dra_arcsec": -613.32,
-     "ddec_arcsec": -250.93,
-     "V": 18.94,
-     "err_arcsec": 1.869,
+     "dra_arcsec": -612.92,
+     "ddec_arcsec": -251.04,
+     "V": 18.95,
+     "err_arcsec": 0.806,
      "cls": "MB>Inner",
      "rate_arcsec_h": [
-      30.5213,
+      30.5212,
       -15.815
      ]
     },
     {
      "name": "252409 2001 TN93",
-     "dra_arcsec": 603.26,
+     "dra_arcsec": 603.38,
      "ddec_arcsec": 288.6,
-     "V": 21.09,
-     "err_arcsec": 0.085,
+     "V": 21.06,
+     "err_arcsec": 0.102,
      "cls": "MB>Middle",
      "rate_arcsec_h": [
       11.0088,
@@ -463,8 +394,8 @@
      "name": "50000 Quaoar",
      "dra_arcsec": -0.36,
      "ddec_arcsec": 0.17,
-     "V": 19.01,
-     "err_arcsec": 2.199,
+     "V": 19.0,
+     "err_arcsec": 0.376,
      "cls": "KBO>Classical>Main",
      "rate_arcsec_h": [
       -0.6835,
@@ -472,6 +403,7 @@
      ]
     }
    ],
+   "band": null,
    "n_in_box": 13,
    "n_candidates": 3,
    "n_within_3sigma": 1,
@@ -495,6 +427,10 @@
    "best_sig_dec": 0.115,
    "best_dist_sigma": 0.254,
    "best_note": "",
+   "best_band": null,
+   "best_band_mag": null,
+   "best_rms_mag": null,
+   "best_blend": null,
    "result": "unique candidate within 3 sigma",
    "status": "ok"
   }
@@ -514,6 +450,7 @@
     "fwhm_px": 3.19,
     "flux": 15659.0,
     "amp": 1408.5016218465842,
+    "amp_fit": 1408.5016218465842,
     "gaia_star_within": 0.09,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.095,
@@ -567,6 +504,7 @@
     "fwhm_px": 3.59,
     "flux": 167672.0,
     "amp": 12680.280130940933,
+    "amp_fit": 12680.280130940933,
     "gaia_star_within": 0.05,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.028,
@@ -620,6 +558,7 @@
     "fwhm_px": 3.46,
     "flux": 16106.0,
     "amp": 1509.6042776070276,
+    "amp_fit": 1509.6042776070276,
     "gaia_star_within": 0.37,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.098,
@@ -673,6 +612,7 @@
     "fwhm_px": 3.43,
     "flux": 107432.0,
     "amp": 8800.992067562749,
+    "amp_fit": 8800.992067562749,
     "gaia_star_within": 0.12,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.028,
@@ -726,6 +666,7 @@
     "fwhm_px": 3.71,
     "flux": 197443.0,
     "amp": 13725.679278534059,
+    "amp_fit": 13725.679278534059,
     "gaia_star_within": 0.06,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.035,
@@ -779,6 +720,7 @@
     "fwhm_px": 3.4,
     "flux": 20963.0,
     "amp": 1913.679371325672,
+    "amp_fit": 1913.679371325672,
     "gaia_star_within": 0.27,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.086,
@@ -832,6 +774,7 @@
     "fwhm_px": 3.51,
     "flux": 118527.0,
     "amp": 9183.60400734458,
+    "amp_fit": 9183.60400734458,
     "gaia_star_within": 0.1,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.029,
@@ -885,6 +828,7 @@
     "fwhm_px": 3.69,
     "flux": 176152.0,
     "amp": 13471.81497889965,
+    "amp_fit": 13471.81497889965,
     "gaia_star_within": 0.09,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.042,
@@ -930,6 +874,7 @@
       -0.02
      ]
     },
+    "amp_one_source": 12435.64000254384,
     "dist_sigma": 596.881,
     "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
     "note": "blended: fitted jointly with a source 6.5\" away; not shown absent on any other-date plate"
@@ -947,6 +892,7 @@
     "fwhm_px": 3.65,
     "flux": 102017.0,
     "amp": 7947.013689921632,
+    "amp_fit": 7947.013689921632,
     "gaia_star_within": 0.1,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.111,
@@ -992,6 +938,7 @@
       0.12
      ]
     },
+    "amp_one_source": 7165.325130560886,
     "dist_sigma": 172.811,
     "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
     "note": "blended: fitted jointly with a source 6.5\" away; not shown absent on any other-date plate"
@@ -1009,6 +956,7 @@
     "fwhm_px": 3.38,
     "flux": 8396.0,
     "amp": 880.1024411740392,
+    "amp_fit": 880.1024411740392,
     "gaia_star_within": 0.43,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.15,
@@ -1062,6 +1010,7 @@
     "fwhm_px": 3.83,
     "flux": 19100.0,
     "amp": 1383.673900124369,
+    "amp_fit": 1383.673900124369,
     "gaia_star_within": 10.05,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.207,
@@ -1131,6 +1080,7 @@
     "fwhm_px": 3.46,
     "flux": 110523.0,
     "amp": 8721.350861070254,
+    "amp_fit": 8721.350861070254,
     "gaia_star_within": 0.03,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.033,
@@ -1184,6 +1134,7 @@
     "fwhm_px": 3.61,
     "flux": 98363.0,
     "amp": 7360.654396602949,
+    "amp_fit": 7360.654396602949,
     "gaia_star_within": 0.02,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.047,
@@ -1237,6 +1188,7 @@
     "fwhm_px": 3.61,
     "flux": 28003.0,
     "amp": 2212.5749874327003,
+    "amp_fit": 2212.5749874327003,
     "gaia_star_within": 0.09,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.073,
@@ -1290,6 +1242,7 @@
     "fwhm_px": 3.61,
     "flux": 33699.0,
     "amp": 2748.86539260045,
+    "amp_fit": 2748.86539260045,
     "gaia_star_within": 0.13,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.094,
@@ -1335,6 +1288,7 @@
       -0.01
      ]
     },
+    "amp_one_source": 2542.087778802288,
     "dist_sigma": 272.214,
     "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_blue 1954-04-08, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
     "note": "blended: fitted jointly with a source 4.7\" away; not shown absent on any other-date plate"
@@ -1352,6 +1306,7 @@
     "fwhm_px": 4.33,
     "flux": 15088.0,
     "amp": 1191.028462065155,
+    "amp_fit": 1191.028462065155,
     "gaia_star_within": 0.22,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.093,
@@ -1397,6 +1352,7 @@
       0.83
      ]
     },
+    "amp_one_source": null,
     "dist_sigma": 332.833,
     "rejected": "Gaia star; static (present on poss2ukstu_red 1992-06-05)",
     "note": "blended: fitted jointly with a source 4.7\" away"
@@ -1414,6 +1370,7 @@
     "fwhm_px": 3.9,
     "flux": 13001.0,
     "amp": 860.3523961667913,
+    "amp_fit": 860.3523961667913,
     "gaia_star_within": 12.16,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.358,
@@ -1483,6 +1440,7 @@
     "fwhm_px": 3.2,
     "flux": 24774.0,
     "amp": 2263.5539387014087,
+    "amp_fit": 2263.5539387014087,
     "gaia_star_within": 0.02,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.07,
@@ -1536,6 +1494,7 @@
     "fwhm_px": 3.42,
     "flux": 15056.0,
     "amp": 1434.411241839219,
+    "amp_fit": 1434.411241839219,
     "gaia_star_within": 0.37,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.127,
@@ -1589,6 +1548,7 @@
     "fwhm_px": 3.32,
     "flux": 15598.0,
     "amp": 1382.181351963672,
+    "amp_fit": 1382.181351963672,
     "gaia_star_within": 0.18,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.083,
@@ -1642,6 +1602,7 @@
     "fwhm_px": 3.7,
     "flux": 12311.0,
     "amp": 927.0954183872536,
+    "amp_fit": 927.0954183872536,
     "gaia_star_within": 17.23,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.292,
@@ -1711,6 +1672,7 @@
     "fwhm_px": 3.54,
     "flux": 114405.0,
     "amp": 8888.513165079412,
+    "amp_fit": 8888.513165079412,
     "gaia_star_within": 0.01,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.026,
@@ -1764,6 +1726,7 @@
     "fwhm_px": 3.51,
     "flux": 125765.0,
     "amp": 9762.223534154853,
+    "amp_fit": 9762.223534154853,
     "gaia_star_within": 0.11,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.027,
@@ -1817,6 +1780,7 @@
     "fwhm_px": 3.53,
     "flux": 19930.0,
     "amp": 1738.5017849484848,
+    "amp_fit": 1738.5017849484848,
     "gaia_star_within": 0.68,
     "gaia_radius": 3.22,
     "sig_ra_arcsec": 0.103,
@@ -1862,6 +1826,7 @@
       -0.0
      ]
     },
+    "amp_one_source": 1585.7433993565585,
     "dist_sigma": 636.333,
     "rejected": "Gaia star; static (present on phase2_gsc1 1983-07-10, poss1_red 1954-04-08, poss2ukstu_red 1992-06-05)",
     "note": "blended: fitted jointly with a source 6.9\" away"
@@ -1881,6 +1846,7 @@
     "fwhm_px": 3.66,
     "flux": 4290.0,
     "amp": 725.2469588689211,
+    "amp_fit": 725.2469588689211,
     "gaia_star_within": 26.4,
     "gaia_radius": 3.33,
     "sig_ra_arcsec": 0.562,
@@ -1950,6 +1916,7 @@
     "fwhm_px": 3.41,
     "flux": 4479.0,
     "amp": 1108.341406473397,
+    "amp_fit": 1108.341406473397,
     "gaia_star_within": 33.12,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.428,
@@ -2019,6 +1986,7 @@
     "fwhm_px": 3.28,
     "flux": 5433.0,
     "amp": 1399.9934570733644,
+    "amp_fit": 1399.9934570733644,
     "gaia_star_within": 0.34,
     "gaia_radius": 3.33,
     "sig_ra_arcsec": 0.3,
@@ -2072,6 +2040,7 @@
     "fwhm_px": 2.53,
     "flux": 24670.0,
     "amp": 4798.587426545667,
+    "amp_fit": 4798.587426545667,
     "gaia_star_within": 20.84,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.114,
@@ -2141,6 +2110,7 @@
     "fwhm_px": 2.03,
     "flux": 23127.0,
     "amp": 4784.523069772111,
+    "amp_fit": 4784.523069772111,
     "gaia_star_within": 0.15,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.109,
@@ -2194,6 +2164,7 @@
     "fwhm_px": 2.76,
     "flux": 36038.0,
     "amp": 6408.687421884819,
+    "amp_fit": 6408.687421884819,
     "gaia_star_within": 0.11,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.108,
@@ -2247,6 +2218,7 @@
     "fwhm_px": 3.46,
     "flux": 6372.0,
     "amp": 1522.9713522499542,
+    "amp_fit": 1522.9713522499542,
     "gaia_star_within": 0.33,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.257,
@@ -2300,6 +2272,7 @@
     "fwhm_px": 2.72,
     "flux": 7724.0,
     "amp": 1666.1601357216928,
+    "amp_fit": 1666.1601357216928,
     "gaia_star_within": 0.32,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.214,
@@ -2353,6 +2326,7 @@
     "fwhm_px": 2.6,
     "flux": 22865.0,
     "amp": 4648.22432696888,
+    "amp_fit": 4648.22432696888,
     "gaia_star_within": 0.06,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.131,
@@ -2406,6 +2380,7 @@
     "fwhm_px": 3.23,
     "flux": 6568.0,
     "amp": 1513.4195793585804,
+    "amp_fit": 1513.4195793585804,
     "gaia_star_within": 0.32,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.238,
@@ -2459,6 +2434,7 @@
     "fwhm_px": 2.41,
     "flux": 13433.0,
     "amp": 2843.259240050959,
+    "amp_fit": 2843.259240050959,
     "gaia_star_within": 0.19,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.165,
@@ -2512,6 +2488,7 @@
     "fwhm_px": 3.25,
     "flux": 9358.0,
     "amp": 1670.336122193987,
+    "amp_fit": 1670.336122193987,
     "gaia_star_within": 0.59,
     "gaia_radius": 3.33,
     "sig_ra_arcsec": 0.216,
@@ -2565,6 +2542,7 @@
     "fwhm_px": 2.79,
     "flux": 18126.0,
     "amp": 2883.127056816491,
+    "amp_fit": 2883.127056816491,
     "gaia_star_within": 21.14,
     "gaia_radius": 3.0,
     "sig_ra_arcsec": 0.161,

@@ -8,9 +8,11 @@ For each object it:
 - refits each plate's astrometry to Gaia DR3 stars, moved to the date of the plate;
 - searches the area where JPL Horizons predicts the object, given its uncertainty;
 - rejects stars, plate flaws, known asteroids and comets, and anything that also shows on plates from other dates (POSS-II plates included);
-- fits close neighbors together with the candidate, and writes the positions, their errors and a picture of each plate.
+- fits close neighbors together with the candidate, and writes the positions, their errors and a picture of each plate;
+- on POSS-I plates, measures each candidate's magnitude (Cousins R on red plates, Johnson B on blue ones), calibrated on Gaia DR3 stars;
+- on request, writes the report file for the Minor Planet Center (ADES PSV) with the positions marked reportable.
 
-The tool is one Python file, `tools/precovery.py`.
+The tool is `tools/precovery.py`, with `tools/magnitudes.py` and `tools/mpc_report.py` beside it.
 
 ## Install
 
@@ -20,7 +22,13 @@ You need Python 3.9 or newer.
 python3 -m pip install -r requirements.txt
 ```
 
-Tested with Python 3.9 (numpy 1.26.4, scipy 1.13.1, astropy 6.0.1, Pillow 11.3.0) and Python 3.13 (numpy 2.5.4, scipy 1.18.1, astropy 8.0.2, Pillow 13.0.0).
+To have the report file checked against the Minor Planet Center's schema, also install the IAU's ADES tools (optional):
+
+```
+python3 -m pip install iau-ades
+```
+
+Tested with Python 3.9 (numpy 1.26.4, scipy 1.13.1, astropy 6.0.1, Pillow 11.3.0) and Python 3.13 (numpy 2.5.3, scipy 1.18.1, astropy 8.0.2, Pillow 12.3.0), with iau-ades 0.1.3.
 
 ## Use
 
@@ -77,6 +85,35 @@ For each plate, `result` says whether there is one candidate within 3 sigma of t
 
 Positions on later plates are never marked reportable.
 
+## Magnitudes
+
+On POSS-I plates each candidate gets a magnitude: Cousins R (ADES band `Rc`) on the red plates, Johnson B (`Bj`) on the blue ones. Other plates get none.
+
+- The instrumental magnitude is -2.5 log10 of the fitted peak of a Gaussian with the stars' width, from the same fit as the position (the joint fit when a neighbor blends with the image).
+- The calibration stars are Gaia DR3 stars matched within 1.5", with a proper motion and a BP-RP color, and with no other Gaia source (of any brightness) or detection within 10".
+- Their R and B magnitudes come from Gaia G and BP-RP, with the relations of the Gaia DR3 documentation (below). Stars outside a relation's color range are not used.
+- The calibration is a straight line, catalog magnitude against instrumental magnitude, fitted to the stars within 1 mag of the candidate. There is no color term.
+- The uncertainty combines the calibration's scatter, the candidate's own noise (from fitted peaks at empty places of the plate) and, for a blended image, half the change between the joint and the one-source fit. In the report file it is rounded up to 0.1 mag.
+- There is no magnitude when fewer than 8 calibration stars lie within 1 mag of the candidate, or when the object moved more than half a star width (FWHM) during the exposure: a peak fitted to a trailed image comes out too faint. `results.json` gives the reason (`mag_note`).
+
+`results.csv` gives them as `best_band`, `best_band_mag` and `best_rms_mag`; `results.json` also has the calibration's details for every candidate. The older `best_mag` is a rough Gaia G-scale estimate, kept for the known-object check.
+
+## The report file for the Minor Planet Center
+
+With `--ades SETTINGS.json`, the tool writes `report_<subject>.psv` in the output folder after measuring, for example:
+
+```
+python3 tools/precovery.py quaoar_1954 --ades my_settings.json
+```
+
+- The settings file gives the names for the file's header: the submitter, the measurers and the telescope. Copy `ades_settings.example.json` and fill it in. The tool refuses a settings file that still has the example's placeholder name, an email address, a `prog` key, or line breaks or `|` in a name.
+- Only positions marked reportable go in, and only on nights (Palomar local time) with at least two of them, normally the red and blue plates of one night. A single position is held back and listed.
+- Each row gives the mid-exposure time, the position and its errors, the magnitude and band, the clock's uncertainty as `rmsTime`, Gaia DR3 as the astrometric and photometric catalog, mode `PHO`, and the plate in the remarks. A blue plate takes its red partner's clock, which may not hold for it, so its `rmsTime` is at least 60 s and at least the correction itself.
+- The file has no `prog` field: the Minor Planet Center applies program codes itself.
+- If iau-ades is installed, the file is converted to XML and checked against the Minor Planet Center's submission schema. A file that fails is kept only as `report_<subject>.invalid.psv`, with the validator's reason printed. Measuring again removes an old report.
+
+The tool sends nothing. Read the file before you submit it.
+
 The known-object check asks SkyBoT for the asteroids and comets around the search box at the time of the plate, as seen from the plate's observatory (SkyBoT covers 1889 to 2060). It sets the target aside by its number, name or designation, then compares each source with each other object's path during the exposure:
 
 - An asteroid whose position is known to 5" or better (or whose error SkyBoT doesn't give) rejects the sources within 10" of its path, or within 3 times its position error if that is larger. One predicted to be more than 2 magnitudes fainter than the source only adds a note.
@@ -98,7 +135,10 @@ python3 tools/eval_known.py output/precovery/eris_ukst --ukst
 ## Files
 
 - `tools/precovery.py`: the tool.
+- `tools/magnitudes.py`: the magnitudes on POSS-I plates.
+- `tools/mpc_report.py`: the report file for the Minor Planet Center.
 - `tools/eval_known.py`: scores a known-answer run.
+- `ades_settings.example.json`: an example settings file for the report.
 - `targets/precovery/quaoar_1954.json`, `quaoar_ukst.json`, `eris_ukst.json`: the subjects of the known-answer tests.
 - `targets/precovery/poss1_red_dates_hill2026.csv`, `poss1_red_times_hill2026.csv`: D. Hill's POSS-I plate dates and clock corrections.
 - `known_answers/`: the known-answer criteria and results.
@@ -110,6 +150,10 @@ The POSS-I plate dates and clock corrections are from D. Hill, "POSS Transients 
 
 The Digitized Sky Surveys were produced at the Space Telescope Science Institute under U.S. Government grant NAG W-2166. The images of these surveys are based on photographic data obtained using the Oschin Schmidt Telescope on Palomar Mountain and the UK Schmidt Telescope. The plates were processed into the present compressed digital form with the permission of these institutions. The National Geographic Society - Palomar Observatory Sky Atlas (POSS-I) was made by the California Institute of Technology with grants from the National Geographic Society. The Second Palomar Observatory Sky Survey (POSS-II) was made by the California Institute of Technology with funds from the National Science Foundation, the National Geographic Society, the Sloan Foundation, the Samuel Oschin Foundation, and the Eastman Kodak Corporation. The Oschin Schmidt Telescope is operated by the California Institute of Technology and Palomar Observatory. The UK Schmidt Telescope was operated by the Royal Observatory Edinburgh, with funding from the UK Science and Engineering Research Council (later the UK Particle Physics and Astronomy Research Council), until 1988 June, and thereafter by the Anglo-Australian Observatory. The blue plates of the southern Sky Atlas and its Equatorial Extension (together known as the SERC-J), as well as the Equatorial Red (ER), and the Second Epoch [red] Survey (SES) were all taken with the UK Schmidt. Supplemental funding for sky-survey work at the ST ScI is provided by the European Southern Observatory. No DSS images are included here.
 
+The conversions from Gaia G and BP-RP to Cousins R and Johnson B are those of the Gaia DR3 documentation, section 5.5.1, "Photometric relationships with other photometric systems" (J. M. Carrasco and M. Bellazzini), Table 5.9: https://gea.esac.esa.int/archive/documentation/GDR3/Data_processing/chap_cu5pho/cu5pho_sec_photSystem/cu5pho_ssec_photRelations.html
+
+The report file follows the IAU's Astrometry Data Exchange Standard (ADES); the optional check uses the IAU's ADES tools (https://github.com/IAU-ADES/ADES-Master).
+
 This work has made use of data from the European Space Agency (ESA) mission Gaia (https://www.cosmos.esa.int/gaia), processed by the Gaia Data Processing and Analysis Consortium (DPAC, https://www.cosmos.esa.int/web/gaia/dpac/consortium). Funding for the DPAC has been provided by national institutions, in particular the institutions participating in the Gaia Multilateral Agreement. Gaia DR3: Gaia Collaboration, Vallenari et al. 2023, A&A 674, A1; doi:10.5270/esa-qa4lep3.
 
 The predicted positions and their uncertainties come from JPL's Horizons system (https://ssd.jpl.nasa.gov/horizons/; Giorgini et al. 1996, BAAS 28, 1158).
@@ -118,6 +162,7 @@ The known-object check uses SkyBoT, designed and developed by IMCCE, now LTE (Ob
 
 ## Changes
 
+- 1.2.0: magnitudes on POSS-I plates (Cousins R, Johnson B) calibrated on Gaia DR3; the report file for the Minor Planet Center (ADES PSV) with `--ades`.
 - 1.1.0: the known-object check uses SkyBoT, which covers the dates of the plates, so positions can now be marked reportable (and only on plates with exactly one candidate); `--object` runs a search by object name; an error page from the DSS archive now stops the run instead of reading as "no plate here"; `results.json` writes missing numbers as null.
 - 1.0.0: first release.
 
@@ -127,7 +172,7 @@ The code is under the MIT License (`LICENSE`). Hill's two tables are under CC BY
 
 ## How to cite
 
-Stinga, S. I. 2026, dss-precovery (version 1.1.0), Zenodo, doi:10.5281/zenodo.23833587
+Stinga, S. I. 2026, dss-precovery (version 1.2.0), Zenodo, doi:10.5281/zenodo.24309794
 
 All versions: doi:10.5281/zenodo.23805408
 
